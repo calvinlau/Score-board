@@ -1,6 +1,9 @@
 package me.calvinliu.scoreboard.integration;
 
+import me.calvinliu.scoreboard.server.ScoreboardServer;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -32,6 +35,22 @@ public class ServiceEndpointsIT {
     private static String getWrongHighScoreListUrl = "http://localhost:8081/2/highscorelist?";
 
     ServiceEndpointsIT http = null;
+    private static ScoreboardServer server;
+
+    @BeforeClass
+    public static void setUpClass() {
+        try {
+            server = new ScoreboardServer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        server.start();
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        server.stop();
+    }
 
     @Before
     public void setUp() {

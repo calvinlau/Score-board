@@ -1,9 +1,9 @@
 package me.calvinliu.scoreboard.server;
 
+import com.sun.net.httpserver.HttpServer;
 import me.calvinliu.scoreboard.controller.ControllerFactory;
 import me.calvinliu.scoreboard.property.ConfigProperties;
 import me.calvinliu.scoreboard.session.SessionManager;
-import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -15,10 +15,10 @@ import java.util.concurrent.Executors;
  */
 public class ScoreboardServer {
 
-    private HttpServer httpServer;
-    private ExecutorService serverExecutor;
-    private String hostName;
-    private int port;
+    private static HttpServer httpServer;
+    private static ExecutorService serverExecutor;
+    private static String hostName;
+    private static int port;
 
     public ScoreboardServer() throws IOException {
 
@@ -39,7 +39,7 @@ public class ScoreboardServer {
     /**
      * Starts the server
      */
-    public void start() {
+    public static void start() {
         httpServer.start();
         Runtime.getRuntime().addShutdownHook(new ShutdownHook(httpServer));
         printHelp();
@@ -48,10 +48,10 @@ public class ScoreboardServer {
     /**
      * Stops the server
      */
-    public void stop() {
-        if (this.httpServer != null) {
-            this.httpServer.stop(0);
-            this.serverExecutor.shutdown();
+    public static void stop() {
+        if (httpServer != null) {
+            httpServer.stop(0);
+            serverExecutor.shutdown();
             SessionManager.getInstance().getTimer().cancel();
         }
     }
@@ -68,7 +68,7 @@ public class ScoreboardServer {
     /**
      * Prints the current service endpoints
      */
-    private void printHelp() {
+    private static void printHelp() {
         System.out.println("Operations:");
         System.out.println("---------------------------------------------------------------");
         System.out.println("GET http://" + hostName + ":" + port + "/<userid>/login");

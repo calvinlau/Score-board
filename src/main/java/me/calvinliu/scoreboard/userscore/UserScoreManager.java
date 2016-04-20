@@ -2,21 +2,19 @@ package me.calvinliu.scoreboard.userscore;
 
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by ioannis.metaxas on 2015-12-01.
- *
  * Stores and manages the user scores for every level.
- *
  */
 public class UserScoreManager {
 
     private static volatile UserScoreManager instance = null;
-    private ConcurrentHashMap<Integer, ConcurrentSkipListSet<UserScore>> userScores;
+    private ConcurrentHashMap<Integer, ConcurrentSkipListMap<Integer, AtomicInteger>> levelScores;
 
     private UserScoreManager() {
-        userScores = new ConcurrentHashMap<>();
+        levelScores = new ConcurrentHashMap<>();
     }
 
     /**
@@ -27,14 +25,29 @@ public class UserScoreManager {
      * @param userScore to be put in the map
      */
     public synchronized void postScore(Integer levelId, UserScore userScore) {
-        ConcurrentSkipListSet<UserScore> userScoreLevelSkipListSet = userScores.get(levelId);
-        if(userScoreLevelSkipListSet != null){
-            userScoreLevelSkipListSet.add(userScore);
-            userScores.replace(levelId, userScoreLevelSkipListSet);
+        ConcurrentSkipListMap<Integer, AtomicInteger> scoreMap = levelScores.get(levelId);
+        if (scoreMap == null) {
+            // TODO:
+            scoreMap = new ConcurrentSkipListMap<>();
+            scoreMap.putIfAbsent(userScore.getUserId(), new AtomicInteger(userScore.getScore()));
+            levelScores.putIfAbsent(levelId, scoreMap);
         } else {
-            userScoreLevelSkipListSet = new ConcurrentSkipListSet<>();
-            userScoreLevelSkipListSet.add(userScore);
-            userScores.putIfAbsent(levelId, userScoreLevelSkipListSet);
+            AtomicInteger max = scoreMap.get(userScore.getUserId());
+            if (max == null) {
+                scoreMap.putIfAbsent(userScore.getUserId(), new AtomicInteger(userScore.getScore()));
+            } else {
+                // Use compareAndSet method of AtomicInteger to update high score
+                while (true) {
+                    int maxVal = max.get();
+                    if (userScore.getScore() <= maxVal) {
+                        break;
+                    }
+                    boolean success = max.compareAndSet(maxVal, userScore.getScore());
+                    if (success) {
+                        break;
+                    }
+                }
+            }
         }
     }
 
@@ -47,13 +60,24 @@ public class UserScoreManager {
      * @return the high score list for the given level
      */
     public String getHighScoreList(Integer levelId, int limit) {
-        String response = "";
-        ConcurrentSkipListSet<UserScore> userScoreLevelSkipListSet = userScores.get(levelId);
-        if(userScoreLevelSkipListSet != null) {
-            Iterator<UserScore> iter = userScoreLevelSkipListSet.descendingIterator();
-            response = ScoreListUtil.convertToCSV(iter, limit);
+        ConcurrentSkipListMap<Integer, AtomicInteger> scoreMap = levelScores.get(levelId);
+        StringBuilder sb = new StringBuilder();
+        if (scoreMap != null) {
+            int i = 0;
+            Iterator<Integer> it = scoreMap.keySet().iterator();
+            while (it.hasNext() && i < limit) {
+                Integer userId = it.next();
+                sb.append(userId);
+                sb.append("=");
+                sb.append(scoreMap.get(userId));
+                sb.append(",");
+                i++;
+            }
+            if (sb.length() > 0) {
+                sb.deleteCharAt(sb.length() - 1);
+            }
         }
-        return response;
+        return sb.toString();
     }
 
     /**
@@ -70,21 +94,5 @@ public class UserScoreManager {
             }
         }
         return instance;
-    }
-
-    /**
-     * Returns the user scores map
-     *
-     * @return the user scores map
-     */
-    public ConcurrentHashMap<Integer, ConcurrentSkipListSet<UserScore>> getUserScores() {
-        return userScores;
-    }
-
-    @Override
-    public String toString() {
-        return "UserScoreManager{" +
-                "userScores=" + userScores.toString() +
-                '}';
     }
 }

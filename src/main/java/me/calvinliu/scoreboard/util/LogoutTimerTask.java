@@ -5,9 +5,7 @@ import me.calvinliu.scoreboard.session.SessionManager;
 import java.util.TimerTask;
 
 /**
- * Created by ioannis.metaxas on 2015-11-29.
- *
- * A task for removing user sessions.
+ * Task for removing user sessions.
  */
 public class LogoutTimerTask extends TimerTask {
 

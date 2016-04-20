@@ -1,9 +1,9 @@
 package me.calvinliu.scoreboard.server;
 
+import com.sun.net.httpserver.HttpExchange;
 import me.calvinliu.scoreboard.controller.HttpController;
 import me.calvinliu.scoreboard.util.InvalidParamException;
 import me.calvinliu.scoreboard.util.ParameterVerifier;
-import com.sun.net.httpserver.HttpExchange;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 /**
  * Class that retrieves from HttpExchange the url parameters and the post body
  */
-public class HttpExchangeParameterHelper {
+public class HttpParameterHelper {
 
     private static final String PARAM_VALUE_SEPARATOR_REGEX = "[=]";
     private static final String URL_PARAMETER_SEPARATOR_REGEX = "[?]";
@@ -38,7 +38,6 @@ public class HttpExchangeParameterHelper {
         } catch (IOException ex) {
             throw new InvalidParamException("Error trying to retrieve the parameters from the request", ex);
         }
-
     }
 
     private static Map<String, String> retrieveUrlParametersMap(HttpExchange exchange) throws UnsupportedEncodingException {

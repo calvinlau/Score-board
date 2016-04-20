@@ -1,10 +1,10 @@
 package me.calvinliu.scoreboard.server;
 
-import me.calvinliu.scoreboard.controller.HttpController;
-import me.calvinliu.scoreboard.util.InvalidParamException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import me.calvinliu.scoreboard.controller.HttpController;
+import me.calvinliu.scoreboard.util.InvalidParamException;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -56,7 +56,7 @@ public class ScoreboardHandler implements HttpHandler {
     }
 
     private void writeResponseFromController(HttpExchange exchange, HttpController controller) {
-        RequestParameter requestParameters = HttpExchangeParameterHelper.retrieveParameters(exchange);
+        RequestParameter requestParameters = HttpParameterHelper.retrieveParameters(exchange);
         String response = controller.processRequest(requestParameters.getUrlParameters(), requestParameters.getPostBody(),
                 requestParameters.getIntegerFromUrl());
         writeResponse(exchange, response, HttpURLConnection.HTTP_OK);
