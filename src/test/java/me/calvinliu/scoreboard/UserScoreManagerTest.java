@@ -8,7 +8,6 @@ import org.junit.Test;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -141,7 +140,7 @@ public class UserScoreManagerTest {
         int ADDED_SCORES = 15;
 
         // add more user scores than the limit
-        Map<String, Integer> mapValues = new HashMap<>();
+        Map<Integer, Integer> mapValues = new HashMap<>();
         addUserScores(mapValues, levelId, ADDED_SCORES, false);
 
         String highScoreList = userScoreManager.getHighScoreList(levelId, SCORES_LIMIT);
@@ -164,7 +163,7 @@ public class UserScoreManagerTest {
         int ADDED_SCORES = 15;
 
         // add more user scores than the limit
-        Map<String, Integer> mapValues = new HashMap<>();
+        Map<Integer, Integer> mapValues = new HashMap<>();
 
         addUserScores(mapValues, levelId, ADDED_SCORES, true);
         addUserScores(mapValues, levelId, ADDED_SCORES, true);
@@ -183,12 +182,12 @@ public class UserScoreManagerTest {
         int ADDED_SCORES = 5;
 
         // add more user scores than the limit
-        Map<String, Integer> mapValues = new HashMap<>();
+        Map<Integer, Integer> mapValues = new HashMap<>();
         addUserScores(mapValues, levelId, ADDED_SCORES, false);
 
         String highScoreList = userScoreManager.getHighScoreList(levelId, SCORES_LIMIT);
 
-        for (String userId : mapValues.keySet()) {
+        for (Integer userId : mapValues.keySet()) {
             Integer score = mapValues.get(userId);
             assertTrue("Each userId-score exists in the string", highScoreList.contains(userId + "=" + score));
         }
@@ -234,7 +233,7 @@ public class UserScoreManagerTest {
         }
     }
 
-    private UserScoreThread[] runThreads(Map mapValues, final int NUMBER_OF_NEW_SCORES_IN_NON_EXISTED_LEVEL, final int NUMBER_OF_NEW_SCORES_IN_EXISTED_LEVEL, Integer existedLevelId) {
+    private UserScoreThread[] runThreads(Map<Integer, UserScore> mapValues, final int NUMBER_OF_NEW_SCORES_IN_NON_EXISTED_LEVEL, final int NUMBER_OF_NEW_SCORES_IN_EXISTED_LEVEL, Integer existedLevelId) {
         UserScoreThread[] threads = new UserScoreThread[NUMBER_OF_NEW_SCORES_IN_NON_EXISTED_LEVEL + NUMBER_OF_NEW_SCORES_IN_EXISTED_LEVEL];
 
         startThreads(mapValues, threads, NUMBER_OF_NEW_SCORES_IN_NON_EXISTED_LEVEL, null);
