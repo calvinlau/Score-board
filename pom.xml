@@ -48,7 +48,7 @@
                     <configuration>
                         <archive>
                             <manifest>
-                                <mainClass>com.king.scoreboard.Application</mainClass>
+                                <mainClass>me.calvinliu.scoreboard.Application</mainClass>
                             </manifest>
                         </archive>
                     </configuration>
@@ -57,7 +57,7 @@
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>2.19</version>
                     <configuration>
-                        <groups>com.king.scoreboard.integration.ServiceEndpointsIT</groups>
+                        <groups>com.calvinliu.scoreboard.integration.ServiceEndpointsIT</groups>
                         <includes>
                             <include>**/*IT.java</include>
                         </includes>
