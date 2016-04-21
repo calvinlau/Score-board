@@ -1,9 +1,14 @@
-package me.calvinliu.scoreboard.session;
+/*
+ * Creator: Calvin Liu
+ */
+package me.calvinliu.scoreboard.manager;
 
-import me.calvinliu.scoreboard.property.ConfigProperties;
+import me.calvinliu.scoreboard.model.UserSession;
 import me.calvinliu.scoreboard.util.LogoutTimerTask;
 
+import java.math.BigInteger;
 import java.util.Date;
+import java.util.Map;
 import java.util.Timer;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,15 +23,15 @@ public class SessionManager {
 
     private static volatile SessionManager instance = null;
 
-    private ConcurrentHashMap<String, UserSession> userSessions;
+    private Map<String, UserSession> userSessions;
     private Timer timer;
 
     private SessionManager() {
         userSessions = new ConcurrentHashMap<>();
         // Schedules and starts the logout daemon task
-        LogoutTimerTask task = new LogoutTimerTask(ConfigProperties.getInstance().getLogoutTimeout());
+        LogoutTimerTask task = new LogoutTimerTask(PropertiesManager.getInstance().getLogoutTimeout());
         this.timer = new Timer(true);
-        timer.scheduleAtFixedRate(task, ConfigProperties.getInstance().getLogoutTimeoutDelay(), ConfigProperties.getInstance().getLogoutTimeoutCheck());
+        timer.scheduleAtFixedRate(task, PropertiesManager.getInstance().getLogoutTimeoutDelay(), PropertiesManager.getInstance().getLogoutTimeoutCheck());
     }
 
     /**
@@ -56,8 +61,9 @@ public class SessionManager {
      *
      * @return a new fairly unique session key
      */
-    public String generateKey() {
-        return UUID.randomUUID().toString();
+    String generateKey() {
+        final String uuid = UUID.randomUUID().toString();
+        return new BigInteger(uuid.replaceAll("-", ""), 16).toString(32);
     }
 
     /**
@@ -69,7 +75,7 @@ public class SessionManager {
     public UserSession createSession(int userId) {
         String key = generateKey();
         UserSession session = new UserSession(userId, key);
-        userSessions.putIfAbsent(key, session);
+        userSessions.put(key, session);
         return session;
     }
 

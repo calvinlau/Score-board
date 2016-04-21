@@ -1,11 +1,13 @@
-package me.calvinliu.scoreboard;
+/*
+ * Creator: Calvin Liu
+ */
+package me.calvinliu.scoreboard.util;
 
-import me.calvinliu.scoreboard.util.ParameterVerifier;
 import org.junit.Test;
+import org.mockito.Mockito;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
-import org.mockito.Mockito;
 
 public class ValidatorTest {
 

@@ -1,9 +1,13 @@
+/*
+ * Creator: Calvin Liu
+ */
 package me.calvinliu.scoreboard.server;
 
 import com.sun.net.httpserver.HttpExchange;
 import me.calvinliu.scoreboard.controller.HttpController;
 import me.calvinliu.scoreboard.util.InvalidParamException;
 import me.calvinliu.scoreboard.util.ParameterVerifier;
+import me.calvinliu.scoreboard.util.ResponseCode;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -83,7 +87,7 @@ public class HttpParameterHelper {
         if (matcher.find()) {
             return ParameterVerifier.getValueAsUnsignedInt(matcher.group());
         } else {
-            throw new InvalidParamException("");
+            throw new InvalidParamException(ResponseCode.ERR_INVALID_INTEGER);
         }
     }
 }

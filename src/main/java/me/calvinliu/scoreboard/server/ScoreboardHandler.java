@@ -1,3 +1,6 @@
+/*
+ * Creator: Calvin Liu
+ */
 package me.calvinliu.scoreboard.server;
 
 import com.sun.net.httpserver.Headers;
@@ -5,6 +8,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import me.calvinliu.scoreboard.controller.HttpController;
 import me.calvinliu.scoreboard.util.InvalidParamException;
+import me.calvinliu.scoreboard.util.ResponseCode;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -33,7 +37,7 @@ public class ScoreboardHandler implements HttpHandler {
                 }
             }
             LOGGER.info(exchange.getRequestMethod() + " Url not mapped: " + exchange.getRequestURI());
-            writeResponse(exchange, "Unknown URL", HttpURLConnection.HTTP_BAD_REQUEST);
+            writeResponse(exchange, ResponseCode.ERR_WRONG_URL, HttpURLConnection.HTTP_OK);
         } catch (InvalidParamException e) {
             LOGGER.warning("URL Handler error, " + e.getMessage());
         } finally {

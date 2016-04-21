@@ -1,10 +1,10 @@
-package me.calvinliu.scoreboard.userscore;
-
+/*
+ * Creator: Calvin Liu
+ */
+package me.calvinliu.scoreboard.model;
 
 /**
- * Created by ioannis.metaxas on 2015-11-28.
- *
- * Model of the user score relation
+ * Model of the user score
  */
 public class UserScore implements Comparable<UserScore> {
 
@@ -33,8 +33,15 @@ public class UserScore implements Comparable<UserScore> {
     }
 
     @Override
-    public int compareTo(UserScore o) {
-        if (o == null) return 1;
-        return this.score - o.getScore();
+    public int compareTo(UserScore that) {
+        if (this.score == null)
+            if (that.score == null)
+                return 0;
+            else
+                return -1;
+        else if (that.score == null)
+            return 1;
+        else
+            return this.score.compareTo(that.score);
     }
 }

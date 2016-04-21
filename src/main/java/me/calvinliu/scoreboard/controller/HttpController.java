@@ -1,3 +1,6 @@
+/*
+ * Creator: Calvin Liu
+ */
 package me.calvinliu.scoreboard.controller;
 
 import java.util.Map;

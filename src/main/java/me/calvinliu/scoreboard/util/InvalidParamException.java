@@ -1,9 +1,10 @@
+/*
+ * Creator: Calvin Liu
+ */
 package me.calvinliu.scoreboard.util;
 
 /**
  * Exception that represents an invalid parameter from a request
- *
- * @author adarrivi
  */
 public class InvalidParamException extends RuntimeException {
 

@@ -1,7 +1,9 @@
-package me.calvinliu.scoreboard;
+/*
+ * Creator: Calvin Liu
+ */
+package me.calvinliu.scoreboard.manager;
 
-import me.calvinliu.scoreboard.userscore.UserScore;
-import me.calvinliu.scoreboard.userscore.UserScoreManager;
+import me.calvinliu.scoreboard.model.UserScore;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,22 +13,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 public class UserScoreManagerTest {
 
-    private UserScoreManager userScoreManager;
     private static SecureRandom random;
+    private ScoreManager userScoreManager;
 
     @Before
     public void setUp() {
-        userScoreManager = UserScoreManager.getInstance();
+        userScoreManager = ScoreManager.getInstance();
         random = new SecureRandom();
     }
 
     @Test
     public void testSingletonInstance() {
-        assertSame(UserScoreManager.getInstance(), UserScoreManager.getInstance());
+        assertSame(ScoreManager.getInstance(), ScoreManager.getInstance());
     }
 
     @Test
@@ -82,8 +86,8 @@ public class UserScoreManagerTest {
 
         // add a level with 5 scores
         ConcurrentSkipListSet<UserScore> existedConcurrentSkipListSet = new ConcurrentSkipListSet<>();
-        for(int i = 0; i < NUMBER_OF_EXISTED_SCORES; i++) {
-            existedUserScores[i] =  new UserScore(getRandomUserId(), getRandomId());
+        for (int i = 0; i < NUMBER_OF_EXISTED_SCORES; i++) {
+            existedUserScores[i] = new UserScore(getRandomUserId(), getRandomId());
             // Stores values for later testing
             mapValues.put(existedLevelId, existedUserScores[i]);
             // Stores values in the existed set
@@ -148,7 +152,7 @@ public class UserScoreManagerTest {
         assertEquals("HishScoreList string size", SCORES_LIMIT, highScoreList.split(",").length);
 
         String[] subStrings = highScoreList.split(",");
-        for(int i = 0; i < subStrings.length - 1; i++) {
+        for (int i = 0; i < subStrings.length - 1; i++) {
             assertTrue("Pair score ordering ascending", Integer.parseInt(subStrings[i].split("=")[1]) > Integer.parseInt(subStrings[i + 1].split("=")[1]));
         }
 
@@ -195,7 +199,7 @@ public class UserScoreManagerTest {
         assertEquals("HighScoreList string size", ADDED_SCORES, highScoreList.split(",").length);
 
         String[] subStrings = highScoreList.split(",");
-        for(int i = 0; i < subStrings.length - 1; i++) {
+        for (int i = 0; i < subStrings.length - 1; i++) {
             assertTrue("Pair score ordering ascending", Integer.parseInt(subStrings[i].split("=")[1]) > Integer.parseInt(subStrings[i + 1].split("=")[1]));
         }
 
@@ -213,20 +217,20 @@ public class UserScoreManagerTest {
     /**
      * Adds a number of user scores to a specific levelId and stores the values in a temporary given map
      *
-     * @param mapValues map Values
-     * @param levelId level Id
+     * @param mapValues    map Values
+     * @param levelId      level Id
      * @param ADDED_SCORES ADDED_SCORES
      */
     public void addUserScores(Map<Integer, Integer> mapValues, Integer levelId, final int ADDED_SCORES, boolean sameUserId) {
         ConcurrentSkipListSet<UserScore> concurrentSkipListSetLevel = new ConcurrentSkipListSet<>();
         int userId = getRandomUserId();
-        for(int i = 0; i < ADDED_SCORES; i++) {
+        for (int i = 0; i < ADDED_SCORES; i++) {
             userId = sameUserId ? userId : getRandomUserId();
             UserScore userScore = new UserScore(userId, getRandomId());
             mapValues.put(userScore.getUserId(), userScore.getScore());
             concurrentSkipListSetLevel.add(userScore);
         }
-        if(userScoreManager.getUserScores().get(levelId) != null) {
+        if (userScoreManager.getUserScores().get(levelId) != null) {
             userScoreManager.getUserScores().get(levelId).addAll(concurrentSkipListSetLevel);
         } else {
             userScoreManager.getUserScores().put(levelId, concurrentSkipListSetLevel);
@@ -243,7 +247,7 @@ public class UserScoreManagerTest {
             for (int i = 0; i < NUMBER_OF_NEW_SCORES_IN_NON_EXISTED_LEVEL; i++) {
                 threads[i].join();
             }
-        } catch(InterruptedException ie) {
+        } catch (InterruptedException ie) {
             System.err.println(ie.getCause());
         }
         return threads;
@@ -254,7 +258,7 @@ public class UserScoreManagerTest {
      * If the existedLevelId is null, it generates random level ids
      */
     private void startThreads(Map<Integer, UserScore> mapValues, UserScoreThread[] threads, final int NUMBER_OF_SCORES, Integer existedLevelId) {
-        for(int i = 0; i < NUMBER_OF_SCORES; i++) {
+        for (int i = 0; i < NUMBER_OF_SCORES; i++) {
             Integer levelId = existedLevelId != null ? existedLevelId : getRandomId();
             UserScore userScore = new UserScore(getRandomUserId(), getRandomId());
             // Store values for later testing
@@ -282,9 +286,9 @@ class UserScoreThread extends Thread {
 
     private Integer levelId;
     private UserScore userScore;
-    private UserScoreManager userScoreManager;
+    private ScoreManager userScoreManager;
 
-    public UserScoreThread(UserScoreManager userScoreManager, int levelId, UserScore userScore) {
+    public UserScoreThread(ScoreManager userScoreManager, int levelId, UserScore userScore) {
         this.userScoreManager = userScoreManager;
         this.levelId = levelId;
         this.userScore = userScore;

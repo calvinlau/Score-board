@@ -1,6 +1,9 @@
+/*
+ * Creator: Calvin Liu
+ */
 package me.calvinliu.scoreboard.util;
 
-import me.calvinliu.scoreboard.session.SessionManager;
+import me.calvinliu.scoreboard.manager.SessionManager;
 
 import java.util.TimerTask;
 

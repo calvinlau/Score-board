@@ -1,4 +1,7 @@
-package me.calvinliu.scoreboard.property;
+/*
+ * Creator: Calvin Liu
+ */
+package me.calvinliu.scoreboard.manager;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -8,7 +11,7 @@ import java.util.logging.Logger;
 /**
  * Configuration properties
  */
-public class ConfigProperties {
+public class PropertiesManager {
     private static final Logger LOGGER = Logger.getLogger("confLogger");
 
     private static final String CONFIGURATION_PROPERTIES = "configuration.properties";
@@ -26,11 +29,11 @@ public class ConfigProperties {
     private static final String MAX_HIGH_SCORES_RETURNED = "MAX_HIGH_SCORES_RETURNED";
     private static final int MAX_HIGH_SCORES_RETURNED_DEFAULT = 15;
 
-    private static volatile ConfigProperties instance = null;
+    private static volatile PropertiesManager instance = null;
 
     private final Properties properties;
 
-    private ConfigProperties() {
+    private PropertiesManager() {
         properties = new Properties();
         load();
     }
@@ -41,11 +44,11 @@ public class ConfigProperties {
      *
      * @return the manager's instance.
      */
-    public static ConfigProperties getInstance() {
+    public static PropertiesManager getInstance() {
         if (instance == null) {
-            synchronized (ConfigProperties.class) {
+            synchronized (PropertiesManager.class) {
                 if (instance == null)
-                    instance = new ConfigProperties();
+                    instance = new PropertiesManager();
             }
         }
         return instance;

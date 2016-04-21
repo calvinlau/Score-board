@@ -1,9 +1,12 @@
+/*
+ * Creator: Calvin Liu
+ */
 package me.calvinliu.scoreboard.server;
 
 import com.sun.net.httpserver.HttpServer;
 import me.calvinliu.scoreboard.controller.ControllerFactory;
-import me.calvinliu.scoreboard.property.ConfigProperties;
-import me.calvinliu.scoreboard.session.SessionManager;
+import me.calvinliu.scoreboard.manager.PropertiesManager;
+import me.calvinliu.scoreboard.manager.SessionManager;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -20,10 +23,10 @@ public class ScoreboardServer {
     private static String hostName;
     private static int port;
 
-    public ScoreboardServer() throws IOException {
+    public static void init() throws IOException {
 
-        port = ConfigProperties.getInstance().getPort();
-        hostName = ConfigProperties.getInstance().getHost();
+        port = PropertiesManager.getInstance().getPort();
+        hostName = PropertiesManager.getInstance().getHost();
 
         // Create the server
         httpServer = HttpServer.create(new InetSocketAddress(port), 0);
@@ -40,6 +43,11 @@ public class ScoreboardServer {
      * Starts the server
      */
     public static void start() {
+        try {
+            init();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         httpServer.start();
         Runtime.getRuntime().addShutdownHook(new ShutdownHook(httpServer));
         printHelp();
@@ -56,15 +64,6 @@ public class ScoreboardServer {
         }
     }
 
-    private ScoreboardHandler createRequestRouter() {
-        ScoreboardHandler requestRouter = new ScoreboardHandler();
-        ControllerFactory controllerFactory = new ControllerFactory();
-        requestRouter.addController(controllerFactory.createLoginController());
-        requestRouter.addController(controllerFactory.createHighScoreController());
-        requestRouter.addController(controllerFactory.createUserScoreController());
-        return requestRouter;
-    }
-
     /**
      * Prints the current service endpoints
      */
@@ -75,5 +74,14 @@ public class ScoreboardServer {
         System.out.println("POST http://" + hostName + ":" + port + "/<levelid>/score?sessionkey=<sessionkey>&score=<score>");
         System.out.println("GET http://" + hostName + ":" + port + "/<levelid>/highscorelist");
         System.out.println("---------------------------------------------------------------");
+    }
+
+    private static ScoreboardHandler createRequestRouter() {
+        ScoreboardHandler requestRouter = new ScoreboardHandler();
+        ControllerFactory controllerFactory = new ControllerFactory();
+        requestRouter.addController(controllerFactory.createLoginController());
+        requestRouter.addController(controllerFactory.createHighScoreController());
+        requestRouter.addController(controllerFactory.createUserScoreController());
+        return requestRouter;
     }
 }

@@ -1,7 +1,10 @@
+/*
+ * Creator: Calvin Liu
+ */
 package me.calvinliu.scoreboard.controller;
 
-import me.calvinliu.scoreboard.property.ConfigProperties;
-import me.calvinliu.scoreboard.userscore.UserScoreManager;
+import me.calvinliu.scoreboard.manager.PropertiesManager;
+import me.calvinliu.scoreboard.manager.ScoreManager;
 
 import java.util.Map;
 import java.util.logging.Logger;
@@ -12,6 +15,9 @@ import java.util.logging.Logger;
 public class HighScoreListController implements HttpController {
 
     private static final Logger LOGGER = Logger.getLogger("confLogger");
+
+    HighScoreListController() {
+    }
 
     @Override
     public String getRequestMethod() {
@@ -25,7 +31,7 @@ public class HighScoreListController implements HttpController {
 
     @Override
     public String processRequest(Map<String, String> urlParameters, Integer postBody, int levelId) {
-        String response = UserScoreManager.getInstance().getHighScoreList(levelId, ConfigProperties.getInstance().getMaxHighScoresReturnedDefault());
+        String response = ScoreManager.getInstance().getHighScoreList(levelId, PropertiesManager.getInstance().getMaxHighScoresReturnedDefault());
         LOGGER.info("GET-HIGHSCORE-LIST SERVICE CALL (levelId=" + levelId + ") RETURNS: response=" + response);
         return response;
     }

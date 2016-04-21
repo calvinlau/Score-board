@@ -1,7 +1,9 @@
-package me.calvinliu.scoreboard;
+/*
+ * Creator: Calvin Liu
+ */
+package me.calvinliu.scoreboard.manager;
 
-import me.calvinliu.scoreboard.session.SessionManager;
-import me.calvinliu.scoreboard.session.UserSession;
+import me.calvinliu.scoreboard.model.UserSession;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,9 +18,8 @@ import static org.junit.Assert.assertSame;
 
 public class SessionManagerTest {
 
-    private SessionManager sessionManager;
-
     private static SecureRandom random;
+    private SessionManager sessionManager;
 
     @Before
     public void setUp() {

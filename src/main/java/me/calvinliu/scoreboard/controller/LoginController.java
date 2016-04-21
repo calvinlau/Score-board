@@ -1,6 +1,9 @@
+/*
+ * Creator: Calvin Liu
+ */
 package me.calvinliu.scoreboard.controller;
 
-import me.calvinliu.scoreboard.session.SessionManager;
+import me.calvinliu.scoreboard.manager.SessionManager;
 
 import java.util.Map;
 import java.util.logging.Logger;
@@ -11,6 +14,9 @@ import java.util.logging.Logger;
 public class LoginController implements HttpController {
 
     private static final Logger LOGGER = Logger.getLogger("confLogger");
+
+    LoginController() {
+    }
 
     @Override
     public String getRequestMethod() {

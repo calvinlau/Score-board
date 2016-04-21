@@ -1,17 +1,17 @@
+/*
+ * Creator: Calvin Liu
+ */
 package me.calvinliu.scoreboard.server;
 
-import me.calvinliu.scoreboard.session.SessionManager;
 import com.sun.net.httpserver.HttpServer;
+import me.calvinliu.scoreboard.manager.SessionManager;
 
 import java.util.Timer;
 import java.util.logging.Logger;
 
 /**
- * Created by ioannis.metaxas on 2015-11-29.
- *
  * Server hook for terminating the server properly in case of an sudden shutdown.
  * Since it is a separate thread, it could also perform other actions like sending notifications to administrators.
- *
  */
 public class ShutdownHook extends Thread {
 
@@ -26,10 +26,10 @@ public class ShutdownHook extends Thread {
     }
 
     public void run() {
-        if(timer != null) {
+        if (timer != null) {
             timer.cancel();
         }
-        if(httpServer != null){
+        if (httpServer != null) {
             httpServer.stop(0);
         }
         LOGGER.warning("Shutting down the Scoreboard server...");

@@ -1,12 +1,13 @@
-package me.calvinliu.scoreboard.session;
+/*
+ * Creator: Calvin Liu
+ */
+package me.calvinliu.scoreboard.model;
 
-import me.calvinliu.scoreboard.property.ConfigProperties;
+import me.calvinliu.scoreboard.manager.PropertiesManager;
 
 import java.util.Date;
 
 /**
- * Created by ioannis.metaxas on 2015-11-29.
- * <p>
  * Model of the user session
  */
 public class UserSession {
@@ -33,7 +34,7 @@ public class UserSession {
     }
 
     public boolean hasExpired() {
-        return new Date().getTime() - createdDate.getTime() > ConfigProperties.getInstance().getLogoutTimeout();
+        return new Date().getTime() - createdDate.getTime() > PropertiesManager.getInstance().getLogoutTimeout();
     }
 
     @Override
