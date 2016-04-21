@@ -8,8 +8,10 @@ import me.calvinliu.scoreboard.model.UserScore;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Stores and manages the user scores for every level.
@@ -17,7 +19,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class ScoreManager {
 
     private static volatile ScoreManager instance = null;
-    private ConcurrentHashMap<Integer, ConcurrentSkipListSet<UserScore>> levelScores;
+    private ConcurrentHashMap<Integer, NavigableSet<UserScore>> levelScores;
 
     private ScoreManager() {
         levelScores = new ConcurrentHashMap<>();
@@ -47,84 +49,62 @@ public class ScoreManager {
      * @param userScore to be put in the map
      */
     public void postScore(Integer levelId, UserScore userScore) {
-        ConcurrentSkipListSet<UserScore> scoreSet = levelScores.get(levelId);
+        levelScores.computeIfAbsent(levelId, n -> new ConcurrentSkipListSet<>()).add(userScore);
+
+
+        NavigableSet<UserScore> set = levelScores.computeIfAbsent(levelId, n -> new ConcurrentSkipListSet<>());
+        for (UserScore model : set) {
+            if (model.getUserId().equals(userScore.getUserId())) {
+                // Use compareAndSet method of AtomicInteger to update high score
+                AtomicInteger max = model.getScore();
+                while (true) {
+                    int maxVal = max.get();
+                    if (userScore.getScore().get() <= maxVal) {
+                        break;
+                    }
+                    boolean success = max.compareAndSet(maxVal, userScore.getScore().get());
+                    if (success) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        NavigableSet<UserScore> scoreSet = levelScores.get(levelId);
         if (scoreSet == null) {
-            ConcurrentSkipListSet<UserScore> value = new ConcurrentSkipListSet<>();
+            NavigableSet<UserScore> value = new ConcurrentSkipListSet<>();
             scoreSet = levelScores.putIfAbsent(levelId, value);
             if (scoreSet == null) {
                 scoreSet = value;
             }
         }
         scoreSet.add(userScore);
-//        if (scoreSet == null) {
-//            // TODO:
-//            scoreSet = new ConcurrentSkipListMap<Integer, AtomicInteger>(new Comparator<Map.Entry<Integer, AtomicInteger>>() {
-//                @Override
-//                public int compare(Map.Entry<Integer, AtomicInteger> e1,
-//                                   Map.Entry<Integer, AtomicInteger> e2) {
-//                    return e1.getValue().get() - e2.getValue().get();
-//                }
-//            });
-//            scoreSet.putIfAbsent(userScore.getUserId(), new AtomicInteger(userScore.getScore()));
-//            levelScores.putIfAbsent(levelId, scoreSet);
-//        } else {
-//            AtomicInteger max = scoreSet.get(userScore.getUserId());
-//            if (max == null) {
-//                scoreSet.putIfAbsent(userScore.getUserId(), new AtomicInteger(userScore.getScore()));
-//            } else {
-//                // Use compareAndSet method of AtomicInteger to update high score
-//                while (true) {
-//                    int maxVal = max.get();
-//                    if (userScore.getScore() <= maxVal) {
-//                        break;
-//                    }
-//                    boolean success = max.compareAndSet(maxVal, userScore.getScore());
-//                    if (success) {
-//                        break;
-//                    }
-//                }
-//            }
-//        }
     }
 
     /**
      * Returns the high score list for the given level.
-     * The limit value affects the performance of the operation.
      *
      * @param levelId to retrieve the high score list from
      * @param limit   is the maximum scores to be returned
      * @return the high score list for the given level
      */
     public String getHighScoreList(Integer levelId, int limit) {
-//        ConcurrentSkipListSet<UserScore> scoreSet = levelScores.get(levelId);
-//        StringBuilder sb = new StringBuilder();
-//        if (scoreSet != null) {
-//            int i = 0;
-//            Iterator<Integer> it = scoreMap.keySet().iterator();
-//            while (it.hasNext() && i < limit) {
-//                Integer userId = it.next();
-//                sb.append(userId);
-//                sb.append("=");
-//                sb.append(scoreMap.get(userId));
-//                sb.append(",");
-//                i++;
-//            }
-//            if (sb.length() > 0) {
-//                sb.deleteCharAt(sb.length() - 1);
-//            }
-//        }
         String response = "";
-        ConcurrentSkipListSet<UserScore> userScoreLevelSkipListSet = levelScores.get(levelId);
-        if (userScoreLevelSkipListSet != null) {
-            response = convertToCSV(userScoreLevelSkipListSet.descendingIterator(), limit);
+        NavigableSet<UserScore> set = levelScores.get(levelId);
+        if (set != null) {
+            response = convertToCSV(set.descendingIterator(), limit);
         }
         return response;
     }
 
-    private String convertToCSV(Iterator<UserScore> it, Integer limit) {
-        if (limit == null) {
-            limit = Integer.MAX_VALUE;
-        }
+    /**
+     * Convert high score list To CSV
+     *
+     * @param it to retrieve the high score list from
+     * @param limit   is the maximum scores to be returned
+     * @return the high score list for the given level
+     */
+    private String convertToCSV(Iterator<UserScore> it, int limit) {
         StringBuilder buffer = new StringBuilder();
         List<Integer> usedUserScoreIdList = new ArrayList<>();
         int i = 0;
@@ -145,7 +125,7 @@ public class ScoreManager {
         return buffer.toString();
     }
 
-    ConcurrentHashMap<Integer, ConcurrentSkipListSet<UserScore>> getUserScores() {
+    ConcurrentHashMap<Integer, NavigableSet<UserScore>> getUserScores() {
         return levelScores;
     }
 }

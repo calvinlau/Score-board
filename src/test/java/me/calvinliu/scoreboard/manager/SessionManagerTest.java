@@ -10,11 +10,7 @@ import org.junit.Test;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 public class SessionManagerTest {
 
@@ -47,9 +43,14 @@ public class SessionManagerTest {
         // Login a user
         int userId = getRandomUserId();
         UserSession session1 = sessionManager.createSession(userId);
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         UserSession session2 = sessionManager.createSession(userId);
         assertEquals(session1.getUserId(), session2.getUserId());
-        assertFalse(session1.getCreatedDate().before(session2.getCreatedDate()));
+        assertNotEquals(session1.getCreatedDate(), session2.getCreatedDate());
     }
 
     @Test

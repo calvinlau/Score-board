@@ -74,8 +74,9 @@ public class SessionManager {
      */
     public UserSession createSession(int userId) {
         String key = generateKey();
-        // TODO:
-        return userSessions.computeIfAbsent(key, n -> new UserSession(userId, key));
+        UserSession userSession = new UserSession(userId, key);
+        userSessions.put(key, userSession);
+        return userSession;
     }
 
     /**

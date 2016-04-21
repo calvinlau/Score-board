@@ -105,7 +105,7 @@ public class ScoreControllerTest {
     }
 
     @Test
-    public void processRequest_AddsScore() {
+    public void processRequest_AddScore() {
         setupLevel(LEVEL_ID);
         String[] paramNames = {SESSION_KEY};
         String key = sessionManager.createSession(USER_ID).getSessionKey();

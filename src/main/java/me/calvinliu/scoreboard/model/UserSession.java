@@ -36,13 +36,4 @@ public class UserSession {
     public boolean hasExpired() {
         return new Date().getTime() - createdDate.getTime() > PropertiesManager.getInstance().getLogoutTimeout();
     }
-
-    @Override
-    public String toString() {
-        return "UserSession{" +
-                "userId=" + userId +
-                ", sessionKey='" + sessionKey + '\'' +
-                ", createdDate=" + createdDate +
-                '}';
-    }
 }

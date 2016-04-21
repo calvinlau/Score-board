@@ -3,15 +3,17 @@
  */
 package me.calvinliu.scoreboard.model;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Model of the user score
  */
 public class UserScore implements Comparable<UserScore> {
 
     private Integer userId;
-    private Integer score;
+    private AtomicInteger score;
 
-    public UserScore(Integer userId, Integer score) {
+    public UserScore(Integer userId, AtomicInteger score) {
         this.userId = userId;
         this.score = score;
     }
@@ -20,28 +22,24 @@ public class UserScore implements Comparable<UserScore> {
         return userId;
     }
 
-    public Integer getScore() {
+    public AtomicInteger getScore() {
         return score;
     }
 
     @Override
-    public String toString() {
-        return "UserScore{" +
-                "userId='" + userId + '\'' +
-                ", score=" + score +
-                '}';
-    }
-
-    @Override
     public int compareTo(UserScore that) {
-        if (this.score == null)
-            if (that.score == null)
+        if (this.score == null) {
+            if (that.score == null) {
                 return 0;
-            else
+            } else {
                 return -1;
-        else if (that.score == null)
-            return 1;
-        else
-            return this.score.compareTo(that.score);
+            }
+        } else {
+            if (that.score == null) {
+                return 1;
+            } else {
+                return this.score.get() - that.score.get();
+            }
+        }
     }
 }
