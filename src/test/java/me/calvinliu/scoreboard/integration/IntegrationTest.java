@@ -22,8 +22,8 @@ import java.net.URL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-@Category(ServiceEndpointsIT.class)
-public class ServiceEndpointsIT {
+@Category(IntegrationTest.class)
+public class IntegrationTest {
 
     private static final String postWrongScoreUrl = "http://localhost:8081/2/score";
     private static final String requestNegativeBodyScore = "-1";
@@ -36,7 +36,7 @@ public class ServiceEndpointsIT {
     private static final String getHighScoreListUrl = "http://localhost:8081/2/highscorelist";
     private static final String getWrongHighScoreListUrl = "http://localhost:8081/2/highscorelist?";
 
-    ServiceEndpointsIT http = null;
+    IntegrationTest http = null;
 
     @BeforeClass
     public static void setUpClass() {
@@ -50,7 +50,7 @@ public class ServiceEndpointsIT {
 
     @Before
     public void setUp() {
-        http = new ServiceEndpointsIT();
+        http = new IntegrationTest();
     }
 
     @Test

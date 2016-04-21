@@ -20,14 +20,14 @@ public class PropertiesManager {
     private static final String BASE_URI_DEFAULT = "localhost";
     private static final String SERVER_PORT = "SERVER_PORT";
     private static final int SERVER_PORT_DEFAULT = 8081;
-    private static final String LOGOUT_TIMEOUT = "LOGOUT_TIMEOUT";
-    private static final int LOGOUT_TIMEOUT_DEFAULT = 10 * 60 * 1000;
-    private static final String LOGOUT_TIMEOUT_PERIOD_CHECK = "LOGOUT_TIMEOUT_PERIOD_CHECK";
-    private static final int LOGOUT_TIMEOUT_PERIOD_CHECK_DEFAULT = 1 * 60 * 1000;
-    private static final String LOGOUT_TIMEOUT_PERIOD_DELAY = "LOGOUT_TIMEOUT_PERIOD_DELAY";
-    private static final int LOGOUT_TIMEOUT_PERIOD_DELAY_DEFAULT = 0;
-    private static final String MAX_HIGH_SCORES_RETURNED = "MAX_HIGH_SCORES_RETURNED";
-    private static final int MAX_HIGH_SCORES_RETURNED_DEFAULT = 15;
+    private static final String EXPIRATION_TIME = "EXPIRATION_TIME";
+    private static final int EXPIRATION_TIME_DEFAULT = 10 * 60 * 1000;
+    private static final String EXPIRATION_TIME_PERIOD_CHECK = "EXPIRATION_TIME_PERIOD_CHECK";
+    private static final int EXPIRATION_TIME_PERIOD_CHECK_DEFAULT = 1 * 60 * 1000;
+    private static final String EXPIRATION_TIME_PERIOD_DELAY = "EXPIRATION_TIME_PERIOD_DELAY";
+    private static final int EXPIRATION_TIME_PERIOD_DELAY_DEFAULT = 0;
+    private static final String HIGH_SCORES_LIMITATION = "HIGH_SCORES_LIMITATION";
+    private static final int HIGH_SCORES_LIMITATION_DEFAULT = 15;
 
     private static volatile PropertiesManager instance = null;
 
@@ -96,18 +96,18 @@ public class PropertiesManager {
     }
 
     public int getLogoutTimeout() {
-        return getInt(LOGOUT_TIMEOUT, LOGOUT_TIMEOUT_DEFAULT);
+        return getInt(EXPIRATION_TIME, EXPIRATION_TIME_DEFAULT);
     }
 
     public int getLogoutTimeoutCheck() {
-        return getInt(LOGOUT_TIMEOUT_PERIOD_CHECK, LOGOUT_TIMEOUT_PERIOD_CHECK_DEFAULT);
+        return getInt(EXPIRATION_TIME_PERIOD_CHECK, EXPIRATION_TIME_PERIOD_CHECK_DEFAULT);
     }
 
     public int getLogoutTimeoutDelay() {
-        return getInt(LOGOUT_TIMEOUT_PERIOD_DELAY, LOGOUT_TIMEOUT_PERIOD_DELAY_DEFAULT);
+        return getInt(EXPIRATION_TIME_PERIOD_DELAY, EXPIRATION_TIME_PERIOD_DELAY_DEFAULT);
     }
 
     public int getMaxHighScoresReturnedDefault() {
-        return getInt(MAX_HIGH_SCORES_RETURNED, MAX_HIGH_SCORES_RETURNED_DEFAULT);
+        return getInt(HIGH_SCORES_LIMITATION, HIGH_SCORES_LIMITATION_DEFAULT);
     }
 }
