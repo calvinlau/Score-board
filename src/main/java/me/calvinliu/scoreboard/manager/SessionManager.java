@@ -26,12 +26,15 @@ public class SessionManager {
     private Map<String, UserSession> userSessions;
     private Timer timer;
 
+    /**
+     * Private constructor for singleton and init
+     */
     private SessionManager() {
         userSessions = new ConcurrentHashMap<>();
         // Schedules and starts the logout daemon task
-        LogoutTimerTask task = new LogoutTimerTask(PropertiesManager.getInstance().getLogoutTimeout());
+        LogoutTimerTask task = new LogoutTimerTask(PropertiesManager.getInstance().getExpirationTime());
         this.timer = new Timer(true);
-        timer.scheduleAtFixedRate(task, PropertiesManager.getInstance().getLogoutTimeoutDelay(), PropertiesManager.getInstance().getLogoutTimeoutCheck());
+        timer.scheduleAtFixedRate(task, PropertiesManager.getInstance().getExpirationTimeDelay(), PropertiesManager.getInstance().getExpirationTimeCheck());
     }
 
     /**
@@ -55,11 +58,10 @@ public class SessionManager {
     }
 
     /**
-     * This works by choosing 130 bits from a cryptographically secure random bit generator, and encoding them in base-32.
-     * 128 bits is considered to be cryptographically strong, but each digit in a base 32 number can encode 5 bits,
-     * so 128 is rounded up to the next multiple of 5. This encoding is compact and efficient, with 5 random bits per character.
+     * This works by UUID.
+     * Package score for unit test.
      *
-     * @return a new fairly unique session key
+     * @return a new unique session key
      */
     String generateKey() {
         final String uuid = UUID.randomUUID().toString();
@@ -93,14 +95,14 @@ public class SessionManager {
     /**
      * Removes the sessions that are expired based on the given timeout
      *
-     * @param logoutTimeout is the criterion for removing a user session
+     * @param timeout is the criterion for removing a user session
      */
-    public void removeUserSessions(long logoutTimeout) {
+    public void removeUserSessions(long timeout) {
         final Date now = new Date();
         for (UserSession userSession : userSessions.values()) {
-            if (now.getTime() - userSession.getCreatedDate().getTime() > logoutTimeout) {
+            if (now.getTime() - userSession.getCreatedDate().getTime() > timeout) {
                 userSession = userSessions.remove(userSession.getSessionKey());
-                LOGGER.info("UserLogoutTimerTask: Removing userSession [" + userSession + "]");
+                LOGGER.info("[REMOVING SESSION] " + userSession);
             }
         }
     }

@@ -31,7 +31,7 @@ public class LoginController implements HttpController {
     @Override
     public String processRequest(Map<String, String> urlParameters, Integer postBody, int userId) {
         String sessionKey = SessionManager.getInstance().createSession(userId).getSessionKey();
-        LOGGER.info("LOGIN SERVICE CALL (userId=" + userId + ") RETURNS: sessionKey=" + sessionKey);
+        LOGGER.info("[LOGIN](userId=" + userId + ") RETURNS: sessionKey=" + sessionKey);
         return sessionKey;
     }
 }

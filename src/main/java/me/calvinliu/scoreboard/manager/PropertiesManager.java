@@ -33,6 +33,9 @@ public class PropertiesManager {
 
     private final Properties properties;
 
+    /**
+     * Private constructor for singleton and init
+     */
     private PropertiesManager() {
         properties = new Properties();
         load();
@@ -95,19 +98,19 @@ public class PropertiesManager {
         return getInt(SERVER_PORT, SERVER_PORT_DEFAULT);
     }
 
-    public int getLogoutTimeout() {
+    public int getExpirationTime() {
         return getInt(EXPIRATION_TIME, EXPIRATION_TIME_DEFAULT);
     }
 
-    public int getLogoutTimeoutCheck() {
+    public int getExpirationTimeCheck() {
         return getInt(EXPIRATION_TIME_PERIOD_CHECK, EXPIRATION_TIME_PERIOD_CHECK_DEFAULT);
     }
 
-    public int getLogoutTimeoutDelay() {
+    public int getExpirationTimeDelay() {
         return getInt(EXPIRATION_TIME_PERIOD_DELAY, EXPIRATION_TIME_PERIOD_DELAY_DEFAULT);
     }
 
-    public int getMaxHighScoresReturnedDefault() {
+    public int getHighScoresLimit() {
         return getInt(HIGH_SCORES_LIMITATION, HIGH_SCORES_LIMITATION_DEFAULT);
     }
 }

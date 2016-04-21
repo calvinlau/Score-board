@@ -18,6 +18,7 @@ import static org.junit.Assert.*;
 
 public class ScoreManagerTest {
 
+    public static final int DEFAULT_LIMIT = PropertiesManager.getInstance().getHighScoresLimit();
     private static SecureRandom random;
     private ScoreManager scoreManager;
 
@@ -33,34 +34,49 @@ public class ScoreManagerTest {
     }
 
     @Test
-    public void testPutUserScoreLevelExisted() {
+    public void testPostScore_SameLevel_DiffUser() {
         // Add a level with a user score before the call
         Integer levelId = getRandomId();
         UserScore oldUserScore = new UserScore(getRandomUserId(), getRandomId());
-        ConcurrentSkipListSet<UserScore> oldConcurrentSkipListSet = new ConcurrentSkipListSet<>();
-        oldConcurrentSkipListSet.add(oldUserScore);
-        scoreManager.getUserScores().put(levelId, oldConcurrentSkipListSet);
-
+        scoreManager.postScore(levelId, oldUserScore);
         // Call with a new user score
         UserScore newUserScore = new UserScore(getRandomUserId(), getRandomId());
         scoreManager.postScore(levelId, newUserScore);
 
         // Asserts that given levelId is contained in the set
         assertTrue(scoreManager.getUserScores().containsKey(levelId));
-
         // Asserts that the given and returned set objects are the same
-        NavigableSet<UserScore> newConcurrentSkipListSet = scoreManager.getUserScores().get(levelId);
-        assertTrue(newConcurrentSkipListSet.equals(oldConcurrentSkipListSet));
-
+        NavigableSet<UserScore> set = scoreManager.getUserScores().get(levelId);
         // Assert that all the given user scores still exist in the set
-        assertTrue(newConcurrentSkipListSet.contains(oldUserScore));
-        assertTrue(newConcurrentSkipListSet.contains(newUserScore));
+        assertTrue(set.contains(oldUserScore));
+        assertTrue(set.contains(newUserScore));
+        // Assert High Score List
+        assertHighScoreList(levelId, DEFAULT_LIMIT, 2);
 
         scoreManager.getUserScores().clear();
     }
 
     @Test
-    public void testPutUserScoreLevelNotExisted() {
+    public void testPostScore_SameLevel_SameUser() {
+        // Add a level with a user score before the call
+        Integer levelId = getRandomId();
+        Integer userId = getRandomUserId();
+        UserScore oldUserScore = new UserScore(userId, getRandomId());
+        scoreManager.postScore(levelId, oldUserScore);
+        // Call with a new user score
+        UserScore newUserScore = new UserScore(userId, getRandomId());
+        scoreManager.postScore(levelId, newUserScore);
+
+        // Asserts that given levelId is contained in the set
+        assertTrue(scoreManager.getUserScores().containsKey(levelId));
+        // Assert High Score List
+        assertHighScoreList(levelId, DEFAULT_LIMIT, 1);
+
+        scoreManager.getUserScores().clear();
+    }
+
+    @Test
+    public void testPostScore_LevelNotExisted() {
         Integer levelId = getRandomId();
         UserScore userScore = new UserScore(getRandomUserId(), getRandomId());
         scoreManager.postScore(levelId, userScore);
@@ -71,7 +87,7 @@ public class ScoreManagerTest {
     }
 
     @Test
-    public void testPutUserScoreAddUserScoresToOneExistedLevelAndManyOtherNonExistedLevelsMultipleTreads() {
+    public void testPostScoreAddUserScoresToOneExistedLevelAndManyOtherNonExistedLevelsMultipleTreads() {
         int NUMBER_OF_EXISTED_LEVELS = 1;
         int NUMBER_OF_EXISTED_SCORES = 5;
         int NUMBER_OF_NEW_SCORES_IN_EXISTED_LEVEL = 5;
@@ -116,7 +132,7 @@ public class ScoreManagerTest {
     }
 
     @Test
-    public void testPutUserScoreLevelsNotExistedMultipleTreads() {
+    public void testPostScoreLevelsNotExistedMultipleTreads() {
         int NUMBER_OF_THREADS = 10;
         Map<Integer, UserScore> mapValues = new HashMap<>();
 
@@ -144,16 +160,13 @@ public class ScoreManagerTest {
 
         // add more user scores than the limit
         Map<Integer, Integer> mapValues = new HashMap<>();
-        addUserScores(mapValues, levelId, ADDED_SCORES, false);
+        postScores(mapValues, levelId, ADDED_SCORES, false);
 
         String highScoreList = scoreManager.getHighScoreList(levelId, SCORES_LIMIT);
 
         assertEquals("HishScoreList string size", SCORES_LIMIT, highScoreList.split(",").length);
 
-        String[] subStrings = highScoreList.split(",");
-        for (int i = 0; i < subStrings.length - 1; i++) {
-            assertTrue("Pair score ordering ascending", Integer.parseInt(subStrings[i].split("=")[1]) > Integer.parseInt(subStrings[i + 1].split("=")[1]));
-        }
+        assertOrder(highScoreList);
 
         scoreManager.getUserScores().clear();
     }
@@ -168,8 +181,8 @@ public class ScoreManagerTest {
         // add more user scores than the limit
         Map<Integer, Integer> mapValues = new HashMap<>();
 
-        addUserScores(mapValues, levelId, ADDED_SCORES, true);
-        addUserScores(mapValues, levelId, ADDED_SCORES, true);
+        postScores(mapValues, levelId, ADDED_SCORES, true);
+        postScores(mapValues, levelId, ADDED_SCORES, true);
 
         String highScoreList = scoreManager.getHighScoreList(levelId, SCORES_LIMIT);
 
@@ -186,7 +199,7 @@ public class ScoreManagerTest {
 
         // add more user scores than the limit
         Map<Integer, Integer> mapValues = new HashMap<>();
-        addUserScores(mapValues, levelId, ADDED_SCORES, false);
+        postScores(mapValues, levelId, ADDED_SCORES, false);
 
         String highScoreList = scoreManager.getHighScoreList(levelId, SCORES_LIMIT);
 
@@ -220,19 +233,13 @@ public class ScoreManagerTest {
      * @param levelId      level Id
      * @param ADDED_SCORES ADDED_SCORES
      */
-    public void addUserScores(Map<Integer, Integer> mapValues, Integer levelId, final int ADDED_SCORES, boolean sameUserId) {
-        ConcurrentSkipListSet<UserScore> concurrentSkipListSetLevel = new ConcurrentSkipListSet<>();
+    public void postScores(Map<Integer, Integer> mapValues, Integer levelId, final int ADDED_SCORES, boolean sameUserId) {
         int userId = getRandomUserId();
         for (int i = 0; i < ADDED_SCORES; i++) {
             userId = sameUserId ? userId : getRandomUserId();
             UserScore userScore = new UserScore(userId, getRandomId());
             mapValues.put(userScore.getUserId(), userScore.getScore());
-            concurrentSkipListSetLevel.add(userScore);
-        }
-        if (scoreManager.getUserScores().get(levelId) != null) {
-            scoreManager.getUserScores().get(levelId).addAll(concurrentSkipListSetLevel);
-        } else {
-            scoreManager.getUserScores().put(levelId, concurrentSkipListSetLevel);
+            scoreManager.postScore(levelId, userScore);
         }
     }
 
@@ -267,6 +274,26 @@ public class ScoreManagerTest {
             threads[i] = new ScoreManagerThread(scoreManager, levelId, userScore);
             threads[i].start();
         }
+    }
+
+    private void assertHighScoreList(Integer levelId, int limit, int size) {
+        String highScoreList = scoreManager.getHighScoreList(levelId, limit);
+        assertSize(highScoreList, size);
+        assertOrder(highScoreList);
+    }
+
+    private void assertOrder(String highScoreList) {
+        if (highScoreList == null) {
+            return;
+        }
+        String[] scores = highScoreList.split(",");
+        for (int i = 0; i < scores.length - 1; i++) {
+            assertTrue("Assert Ordering ascending", Integer.parseInt(scores[i].split("=")[1]) > Integer.parseInt(scores[i + 1].split("=")[1]));
+        }
+    }
+
+    private void assertSize(String highScoreList, int target) {
+        assertEquals("Assert Size", highScoreList.split(",").length, target);
     }
 
     private int getRandomId() {

@@ -31,8 +31,8 @@ public class HighScoreListController implements HttpController {
 
     @Override
     public String processRequest(Map<String, String> urlParameters, Integer postBody, int levelId) {
-        String response = ScoreManager.getInstance().getHighScoreList(levelId, PropertiesManager.getInstance().getMaxHighScoresReturnedDefault());
-        LOGGER.info("GET-HIGHSCORE-LIST SERVICE CALL (levelId=" + levelId + ") RETURNS: response=" + response);
+        String response = ScoreManager.getInstance().getHighScoreList(levelId, PropertiesManager.getInstance().getHighScoresLimit());
+        LOGGER.info("[HIGHSCORELIST] (levelId=" + levelId + ") RETURNS: response=" + response);
         return response;
     }
 }

@@ -19,6 +19,9 @@ public class ScoreManager {
     private static volatile ScoreManager instance = null;
     private ConcurrentHashMap<Integer, NavigableSet<UserScore>> levelScores;
 
+    /**
+     * Private constructor for singleton and init
+     */
     private ScoreManager() {
         levelScores = new ConcurrentHashMap<>();
     }
@@ -83,6 +86,11 @@ public class ScoreManager {
         return response.toString();
     }
 
+    /**
+     * Directly get the level score map for unit testing.
+     *
+     * @return level score map
+     */
     ConcurrentHashMap<Integer, NavigableSet<UserScore>> getUserScores() {
         return levelScores;
     }

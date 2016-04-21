@@ -44,7 +44,7 @@ public class ScoreController implements HttpController {
             throw new InvalidParamException(ResponseCode.ERR_INVALID_SESSION);
         }
         ScoreManager.getInstance().postScore(levelId, new UserScore(session.getUserId(), score));
-        LOGGER.info("USER_SCORE_LEVEL SERVICE CALL (levelId=" + levelId + ", sessionKey=" + session.getSessionKey() + ", score=" + score + ")");
+        LOGGER.info("[SCORE](levelId=" + levelId + ", sessionKey=" + session.getSessionKey() + ", score=" + score + ")");
         return EMPTY;
     }
 }
