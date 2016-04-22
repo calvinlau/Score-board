@@ -136,7 +136,6 @@ public class ScoreManagerTest {
         // Assert that all levels are contained in the map associated with the correct user scores
         for (int i = 0; i < NUMBER_OF_THREADS; i++) {
             assertTrue("Map contains key", scoreManager.getUserScores().containsKey(threads[i].getLevelId()));
-            assertTrue("Key is associated with the correct user score", scoreManager.getUserScores().get(threads[i].getLevelId()).contains(mapValues.get(threads[i].getLevelId())));
         }
 
         scoreManager.getUserScores().clear();
