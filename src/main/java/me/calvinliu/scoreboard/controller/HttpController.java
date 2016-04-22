@@ -16,7 +16,7 @@ public interface HttpController {
 
     String getUrlRegexPattern();
 
-    String processRequest(Map<String, String> urlParameters, Integer postBody, int integerFromUrl);
+    String processRequest(Map<String, String> urlParameters, Integer postBody, int urlInteger);
 
     String getRequestMethod();
 }

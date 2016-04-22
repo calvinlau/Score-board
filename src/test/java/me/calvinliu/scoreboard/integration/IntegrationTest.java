@@ -3,6 +3,8 @@
  */
 package me.calvinliu.scoreboard.integration;
 
+import me.calvinliu.scoreboard.controller.HttpController;
+import me.calvinliu.scoreboard.manager.ScoreManager;
 import me.calvinliu.scoreboard.server.ScoreboardServer;
 import me.calvinliu.scoreboard.util.ResponseCode;
 import org.junit.AfterClass;
@@ -25,18 +27,18 @@ import static org.junit.Assert.assertNotEquals;
 @Category(IntegrationTest.class)
 public class IntegrationTest {
 
-    private static final String postWrongScoreUrl = "http://localhost:8081/2/score";
-    private static final String requestNegativeBodyScore = "-1";
-    private static final String postScoreUrl = "http://localhost:8081/2/score?"; //sessionkey=UICSNDK";
-    private static final String requestBodyScore = "1000";
-    private static final String requestTooBigBodyScore = String.valueOf(Long.MAX_VALUE);
-    private static final String requestStringBodyScore = "an arbitrary string";
-    private static final String getLoginUrl = "http://localhost:8081/2/login";
-    private static final String getWrongLoginUrl = "http://localhost:8081/2/login1";
-    private static final String getHighScoreListUrl = "http://localhost:8081/2/highscorelist";
-    private static final String getWrongHighScoreListUrl = "http://localhost:8081/2/highscorelist?";
+    private static final String BODY_SCORE = "1000";
+    private static final String BODY_SCORE_OVERFLOW = String.valueOf(Long.MAX_VALUE);
+    private static final String BODY_SCORE_STRING = "string";
+    private static final String LOGIN_URL = "http://localhost:8081/2/login";
+    private static final String INVALID_LOGIN_URL = "http://localhost:8081/2/login1";
+    private static final String SCORE_URL = "http://localhost:8081/2/score?"; //sessionkey=UICSNDK";
+    private static final String SCORE_URL_INVALID = "http://localhost:8081/2/score";
+    private static final String HIGH_SCORE_LIST_URL = "http://localhost:8081/2/highscorelist";
+    private static final String HIGH_SCORE_LIST_URL_INVALID = "http://localhost:8081/2/highscorelist?";
 
-    IntegrationTest http = null;
+    private IntegrationTest http = null;
+    private ScoreManager scoreManager;
 
     @BeforeClass
     public static void setUpClass() {
@@ -51,66 +53,67 @@ public class IntegrationTest {
     @Before
     public void setUp() {
         http = new IntegrationTest();
+        scoreManager = ScoreManager.getInstance();
     }
 
     @Test
-    public void testLoginService() {
-        assertEquals(HttpURLConnection.HTTP_OK, http.sendGet(getLoginUrl).getCode());
+    public void testLogin() {
+        assertEquals(HttpURLConnection.HTTP_OK, http.sendGet(LOGIN_URL).getCode());
     }
 
     @Test
-    public void testLoginServiceWrongUri() {
-        HttpResult result = http.sendGet(getWrongLoginUrl);
+    public void testLogin_InValid() {
+        HttpResult result = http.sendGet(INVALID_LOGIN_URL);
         assertEquals(HttpURLConnection.HTTP_OK, result.getCode());
         assertEquals(ResponseCode.ERR_WRONG_URL, result.getResponse());
     }
 
     @Test
-    public void testPostUserScoreService() {
-        HttpResult result = http.sendGet(getLoginUrl);
-        assertEquals(HttpURLConnection.HTTP_OK, http.sendPost(postScoreUrl + "sessionkey=" + result.getResponse(), requestBodyScore).getCode());
+    public void testPostScore() {
+        HttpResult loginResult = http.sendGet(LOGIN_URL);
+        HttpResult scoreResult = http.sendPost(SCORE_URL + "sessionkey=" + loginResult.getResponse(), BODY_SCORE);
+        assertEquals(HttpURLConnection.HTTP_OK, scoreResult.getCode());
+        assertEquals(HttpController.EMPTY, scoreResult.getResponse());
+
+        scoreManager.getUserScores().clear();
     }
 
     @Test
-    public void testPostUserScoreServiceWrongUri() {
-        HttpResult result = http.sendGet(getLoginUrl);
-        assertNotEquals(HttpURLConnection.HTTP_OK, http.sendPost(postWrongScoreUrl + "sessionkey=" + result.getResponse(), requestBodyScore).getCode());
+    public void testPostScore_Invalid() {
+        HttpResult loginResult = http.sendGet(LOGIN_URL);
+        HttpResult scoreResult = http.sendPost(SCORE_URL_INVALID + "sessionkey=" + loginResult.getResponse(), BODY_SCORE);
+        assertNotEquals(HttpURLConnection.HTTP_OK, scoreResult.getCode());
+        assertEquals(HttpController.EMPTY, scoreResult.getResponse());
     }
 
     @Test
-    public void testPostUserScoreServiceNegativeRequestBody() {
-        HttpResult result = http.sendGet(getLoginUrl);
-        assertNotEquals(HttpURLConnection.HTTP_OK, http.sendPost(postScoreUrl + "sessionkey=" + result.getResponse(), requestNegativeBodyScore).getCode());
+    public void testPostScore_Overflow() {
+        HttpResult result = http.sendGet(LOGIN_URL);
+        assertNotEquals(HttpURLConnection.HTTP_OK, http.sendPost(SCORE_URL + "sessionkey=" + result.getResponse(), BODY_SCORE_OVERFLOW).getCode());
     }
 
     @Test
-    public void testPostUserScoreServiceTooBigScoreRequestBody() {
-        HttpResult result = http.sendGet(getLoginUrl);
-        assertNotEquals(HttpURLConnection.HTTP_OK, http.sendPost(postScoreUrl + "sessionkey=" + result.getResponse(), requestTooBigBodyScore).getCode());
+    public void testPostScore_String() {
+        HttpResult result = http.sendGet(LOGIN_URL);
+        assertNotEquals(HttpURLConnection.HTTP_OK, http.sendPost(SCORE_URL + "sessionkey=" + result.getResponse(), BODY_SCORE_STRING).getCode());
     }
 
     @Test
-    public void testPostUserScoreServiceStringScoreRequestBody() {
-        HttpResult result = http.sendGet(getLoginUrl);
-        assertNotEquals(HttpURLConnection.HTTP_OK, http.sendPost(postScoreUrl + "sessionkey=" + result.getResponse(), requestStringBodyScore).getCode());
+    public void testGetHighScoreList() {
+        HttpResult result = http.sendGet(LOGIN_URL);
+        http.sendPost(SCORE_URL + "sessionkey=" + result.getResponse(), "SESSIONKEY");
+        assertEquals(HttpURLConnection.HTTP_OK, http.sendGet(HIGH_SCORE_LIST_URL).getCode());
     }
 
     @Test
-    public void testGetHighScoreListService() {
-        HttpResult result = http.sendGet(getLoginUrl);
-        http.sendPost(postScoreUrl + "sessionkey=" + result.getResponse(), requestBodyScore);
-        assertEquals(HttpURLConnection.HTTP_OK, http.sendGet(getHighScoreListUrl).getCode());
-    }
-
-    @Test
-    public void testGetHighScoreListServiceWrongUri() {
-        HttpResult result = http.sendGet(getWrongHighScoreListUrl);
+    public void testGetHighScoreList_Invalid() {
+        HttpResult result = http.sendGet(HIGH_SCORE_LIST_URL_INVALID);
         assertEquals(HttpURLConnection.HTTP_OK, result.getCode());
         assertEquals(ResponseCode.ERR_WRONG_URL, result.getResponse());
     }
 
     /**
-     * Does HTTP a GET request
+     * Make HTTP GET
      */
     private HttpResult sendGet(String url) {
         BufferedReader reader = null;
@@ -154,7 +157,7 @@ public class IntegrationTest {
     }
 
     /**
-     * Does a HTTP POST request
+     * Make HTTP POST
      */
     private HttpResult sendPost(String url, String requestBody) {
         HttpURLConnection conn = null;
@@ -193,4 +196,3 @@ public class IntegrationTest {
         return new HttpResult("", responseCode);
     }
 }
-

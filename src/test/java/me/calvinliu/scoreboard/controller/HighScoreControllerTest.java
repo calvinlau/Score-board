@@ -42,24 +42,26 @@ public class HighScoreControllerTest {
     }
 
     @Test
-    public void processRequest_ReturnsLevelScoreServiceResult() {
+    public void testProcessRequest() {
         sessionManager.createSession(USER_ID_1).getSessionKey();
         scoreManager.postScore(LEVEL_ID, new UserScore(USER_ID_1, SCORE_1));
         sessionManager.createSession(USER_ID_2).getSessionKey();
         scoreManager.postScore(LEVEL_ID, new UserScore(USER_ID_2, SCORE_2));
         String response = controller.processRequest(null, null, LEVEL_ID);
         assertEquals(HIGH_SCORE, response);
+
+        scoreManager.getUserScores().clear();
     }
 
     @Test
-    public void verifyValidUrls() {
+    public void testValidUrls() {
         assertTrue("/0/highscorelist".matches(controller.getUrlRegexPattern()));
         assertTrue("/1/highscorelist".matches(controller.getUrlRegexPattern()));
         assertTrue("/12345/highscorelist".matches(controller.getUrlRegexPattern()));
     }
 
     @Test
-    public void verifyInvalidsUrls() {
+    public void testInvalidsUrls() {
         assertFalse("/highscorelist".matches(controller.getUrlRegexPattern()));
         assertFalse("//highscorelist".matches(controller.getUrlRegexPattern()));
         assertFalse("/-1/highscorelist".matches(controller.getUrlRegexPattern()));
@@ -72,7 +74,7 @@ public class HighScoreControllerTest {
     }
 
     @Test
-    public void requestMethod_ShouldReturnGet() {
+    public void testRequestMethod() {
         Assert.assertEquals(HttpController.GET, controller.getRequestMethod());
     }
 }

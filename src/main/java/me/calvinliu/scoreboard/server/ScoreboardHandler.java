@@ -60,7 +60,7 @@ public class ScoreboardHandler implements HttpHandler {
     }
 
     private void writeResponseFromController(HttpExchange exchange, HttpController controller) {
-        RequestParameter requestParameters = HttpParameterHelper.retrieveParameters(exchange);
+        RequestParameter requestParameters = RequestParameterHelper.retrieveParameters(exchange);
         String response = controller.processRequest(requestParameters.getUrlParameters(), requestParameters.getPostBody(),
                 requestParameters.getIntegerFromUrl());
         writeResponse(exchange, response, HttpURLConnection.HTTP_OK);

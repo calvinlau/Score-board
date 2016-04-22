@@ -38,7 +38,7 @@ public class PropertiesManager {
      */
     private PropertiesManager() {
         properties = new Properties();
-        load();
+        loadFile();
     }
 
     /**
@@ -58,9 +58,9 @@ public class PropertiesManager {
     }
 
     /**
-     * Loads the configuration properties from a file
+     * Load the configuration properties from file
      */
-    private void load() {
+    private void loadFile() {
         try {
             properties.load(this.getClass().getClassLoader().getResourceAsStream(CONFIGURATION_PROPERTIES));
         } catch (IOException e) {

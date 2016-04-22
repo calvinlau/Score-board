@@ -4,7 +4,7 @@
 package me.calvinliu.scoreboard.integration;
 
 /**
- * Http Result
+ * Http Result for testing
  */
 public class HttpResult {
 

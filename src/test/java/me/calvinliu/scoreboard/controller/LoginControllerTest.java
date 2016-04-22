@@ -25,7 +25,7 @@ public class LoginControllerTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void processRequestTest() {
+    public void testProcessRequest() {
         String key1 = controller.processRequest(null, null, USER_ID);
         assertNotNull(key1);
         String key2 = controller.processRequest(null, null, USER_ID);
@@ -33,14 +33,14 @@ public class LoginControllerTest {
     }
 
     @Test
-    public void verifyValidUrls() {
+    public void testValidUrls() {
         assertTrue("/0/login".matches(controller.getUrlRegexPattern()));
         assertTrue("/1/login".matches(controller.getUrlRegexPattern()));
         assertTrue("/12345/login".matches(controller.getUrlRegexPattern()));
     }
 
     @Test
-    public void verifyInvalidsUrls() {
+    public void testInvalidsUrls() {
         assertFalse("/login".matches(controller.getUrlRegexPattern()));
         assertFalse("//login".matches(controller.getUrlRegexPattern()));
         assertFalse("/1/logina".matches(controller.getUrlRegexPattern()));
@@ -52,7 +52,7 @@ public class LoginControllerTest {
     }
 
     @Test
-    public void requestMethodTest() {
+    public void testRequestMethod() {
         Assert.assertEquals(HttpController.GET, controller.getRequestMethod());
     }
 }

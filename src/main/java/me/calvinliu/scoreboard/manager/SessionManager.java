@@ -4,7 +4,7 @@
 package me.calvinliu.scoreboard.manager;
 
 import me.calvinliu.scoreboard.model.UserSession;
-import me.calvinliu.scoreboard.util.LogoutTimerTask;
+import me.calvinliu.scoreboard.util.ExpiredSessionCleanupTask;
 
 import java.math.BigInteger;
 import java.util.Date;
@@ -32,7 +32,7 @@ public class SessionManager {
     private SessionManager() {
         userSessions = new ConcurrentHashMap<>();
         // Schedules and starts the logout daemon task
-        LogoutTimerTask task = new LogoutTimerTask(PropertiesManager.getInstance().getExpirationTime());
+        ExpiredSessionCleanupTask task = new ExpiredSessionCleanupTask(PropertiesManager.getInstance().getExpirationTime());
         this.timer = new Timer(true);
         timer.scheduleAtFixedRate(task, PropertiesManager.getInstance().getExpirationTimeDelay(), PropertiesManager.getInstance().getExpirationTimeCheck());
     }
@@ -99,10 +99,24 @@ public class SessionManager {
      */
     public void removeUserSessions(long timeout) {
         final Date now = new Date();
+        Map<Integer, String> idKeyMap = new ConcurrentHashMap<>();
         for (UserSession userSession : userSessions.values()) {
+            // Remove expired session
             if (now.getTime() - userSession.getCreatedDate().getTime() > timeout) {
                 userSession = userSessions.remove(userSession.getSessionKey());
                 LOGGER.info("[REMOVING SESSION] " + userSession);
+            }
+            // Remove duplicated session for single user
+            if (idKeyMap.containsKey(userSession.getUserId())) {
+                String key = idKeyMap.get(userSession.getUserId());
+                UserSession preSession = userSessions.get(key);
+                if (preSession != null && preSession.getCreatedDate().getTime() <= userSession.getCreatedDate().getTime()) {
+                    userSessions.remove(preSession.getSessionKey());
+                    LOGGER.info("[REMOVING SESSION] " + userSession);
+                    idKeyMap.replace(userSession.getUserId(), userSession.getSessionKey());
+                }
+            } else {
+                idKeyMap.put(userSession.getUserId(), userSession.getSessionKey());
             }
         }
     }

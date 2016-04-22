@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 
 /**
  * Server hook for terminating the server properly in case of an sudden shutdown.
- * Since it is a separate thread, it could also perform other actions like sending notifications to administrators.
  */
 public class ShutdownHook extends Thread {
 
@@ -32,7 +31,6 @@ public class ShutdownHook extends Thread {
         if (httpServer != null) {
             httpServer.stop(0);
         }
-        LOGGER.warning("Shutting down the Scoreboard server...");
-        LOGGER.info("Sending notifications to the system administrators...");
+        LOGGER.info("Shutting down the Scoreboard server...");
     }
 }

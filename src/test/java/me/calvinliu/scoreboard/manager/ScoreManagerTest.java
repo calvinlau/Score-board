@@ -14,7 +14,9 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 public class ScoreManagerTest {
 
@@ -221,9 +223,7 @@ public class ScoreManagerTest {
     @Test
     public void testGetHighScoreListLevelHasNoScores() {
         Integer levelId = getRandomId();
-        int SCORES_LIMIT = 15;
-
-        assertEquals("", scoreManager.getHighScoreList(levelId, SCORES_LIMIT));
+        assertEquals("", scoreManager.getHighScoreList(levelId, DEFAULT_LIMIT));
     }
 
     /**

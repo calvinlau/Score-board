@@ -15,6 +15,9 @@ public class LoginController implements HttpController {
 
     private static final Logger LOGGER = Logger.getLogger("confLogger");
 
+    /**
+     * Default scope constructor for factory creating and unit testing
+     */
     LoginController() {
     }
 

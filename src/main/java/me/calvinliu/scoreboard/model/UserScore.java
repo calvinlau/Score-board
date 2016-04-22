@@ -40,4 +40,9 @@ public class UserScore implements Comparable<UserScore> {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return "UserScore{userId='" + userId + ", score=" + score + '}';
+    }
 }

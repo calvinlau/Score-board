@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 /**
  * Class that retrieves from HttpExchange the url parameters and the post body
  */
-public class HttpParameterHelper {
+public class RequestParameterHelper {
 
     private static final String PARAM_VALUE_SEPARATOR_REGEX = "[=]";
     private static final String URL_PARAMETER_SEPARATOR_REGEX = "[?]";
@@ -32,13 +32,13 @@ public class HttpParameterHelper {
 
     public static RequestParameter retrieveParameters(HttpExchange exchange) {
         try {
-            RequestParameter parameter = new RequestParameter();
-            parameter.setUrlParameters(retrieveUrlParametersMap(exchange));
+            RequestParameter param = new RequestParameter();
+            param.setUrlParameters(retrieveUrlParametersMap(exchange));
             if (HttpController.POST.equalsIgnoreCase(exchange.getRequestMethod())) {
-                parameter.setPostBody(retrievePostBodyInteger(exchange));
+                param.setPostBody(retrievePostBodyInteger(exchange));
             }
-            parameter.setIntegerFromUrl(getIntegerFromURI(exchange.getRequestURI()));
-            return parameter;
+            param.setIntegerFromUrl(getIntegerFromURI(exchange.getRequestURI()));
+            return param;
         } catch (IOException ex) {
             throw new InvalidParamException("Error trying to retrieve the parameters from the request", ex);
         }

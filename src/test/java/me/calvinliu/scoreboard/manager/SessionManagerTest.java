@@ -9,8 +9,15 @@ import org.junit.Test;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.LinkedList;
+import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 public class SessionManagerTest {
 
@@ -68,7 +75,7 @@ public class SessionManagerTest {
     }
 
     @Test
-    public void testRemoveUserSessionsValidTimeout() {
+    public void testRemoveUserSessions_Timeout() {
         // Sets timeout to 0.1 s
         int timeout = 100;
         // Login a user
@@ -76,12 +83,36 @@ public class SessionManagerTest {
         UserSession session = sessionManager.createSession(userId);
         assertNotNull(sessionManager.getSession(session.getSessionKey()));
         try {
-            Thread.sleep(1000);
+            Thread.sleep(500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         sessionManager.removeUserSessions(timeout);
         assertNull(sessionManager.getSession(session.getSessionKey()));
+    }
+
+    @Test
+    public void testRemoveUserSessions_Single() {
+        // Sets timeout to 600000 ms
+        int timeout = 600000;
+        int repeatTime = 5;
+        // Login 1 user for 5 times
+        int userId = getRandomUserId();
+        List<String> keyList = new LinkedList<>();
+        for (int i = 0; i < repeatTime; i++) {
+            UserSession session = sessionManager.createSession(userId);
+            keyList.add(session.getSessionKey());
+            assertNotNull(sessionManager.getSession(session.getSessionKey()));
+        }
+        sessionManager.removeUserSessions(timeout);
+        int count = 0;
+        for (String key : keyList) {
+            if (sessionManager.getSession(key) != null && sessionManager.getSession(key).getUserId().equals(userId)) {
+                count++;
+            }
+        }
+        // Not sure 100% to clean all duplicate session by one time clean up, eventually it will only single for one user at most.
+        assertTrue(count >= 1);
     }
 
     private int getRandomUserId() {

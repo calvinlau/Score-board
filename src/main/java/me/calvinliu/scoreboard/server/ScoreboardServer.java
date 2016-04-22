@@ -12,11 +12,14 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 /**
  * The score server
  */
 public class ScoreboardServer {
+
+    private static final Logger LOGGER = Logger.getLogger("confLogger");
 
     private static HttpServer httpServer;
     private static ExecutorService serverExecutor;
@@ -46,7 +49,7 @@ public class ScoreboardServer {
         try {
             init();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.warning("Server start error, ex: " + e.getMessage());
         }
         httpServer.start();
         Runtime.getRuntime().addShutdownHook(new ShutdownHook(httpServer));
@@ -76,6 +79,9 @@ public class ScoreboardServer {
         System.out.println("---------------------------------------------------------------");
     }
 
+    /**
+     * Init Controller factory to add router for url request
+     */
     private static ScoreboardHandler createRequestRouter() {
         ScoreboardHandler requestRouter = new ScoreboardHandler();
         ControllerFactory controllerFactory = new ControllerFactory();

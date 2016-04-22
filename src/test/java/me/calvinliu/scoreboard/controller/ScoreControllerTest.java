@@ -3,9 +3,11 @@
  */
 package me.calvinliu.scoreboard.controller;
 
+import me.calvinliu.scoreboard.manager.ScoreManager;
 import me.calvinliu.scoreboard.manager.SessionManager;
 import me.calvinliu.scoreboard.util.InvalidParamException;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -20,12 +22,13 @@ import static org.junit.Assert.assertTrue;
 public class ScoreControllerTest {
 
     private static final String SESSION_KEY = "sessionkey";
-    private static final String KEY = "ASDFABCDF";
-    private static final int LEVEL_ID = 1234;
-    private static final int USER_ID = 2;
-    private static final int SCORE = 30;
+    private static final String KEY = "UICSNDK";
+    private static final int LEVEL_ID = 2121;
+    private static final int USER_ID = 222;
+    private static final int SCORE = 32;
 
-    private SessionManager sessionManager = SessionManager.getInstance();
+    private ScoreManager scoreManager;
+    private SessionManager sessionManager;
 
     @InjectMocks
     private HttpController controller = new ScoreController();
@@ -40,6 +43,12 @@ public class ScoreControllerTest {
 
     // output parameters
     private String response;
+
+    @Before
+    public void setUp() {
+        scoreManager = ScoreManager.getInstance();
+        sessionManager = SessionManager.getInstance();
+    }
 
     private void setupLevel(int level) {
         integerFromUrl = level;
@@ -114,6 +123,8 @@ public class ScoreControllerTest {
         setupScore(SCORE);
         processRequest();
         Assert.assertEquals("", response);
+
+        scoreManager.getUserScores().clear();
     }
 
     @Test
@@ -128,7 +139,7 @@ public class ScoreControllerTest {
     }
 
     @Test
-    public void verifyValidUrls() {
+    public void testValidUrls() {
         assertTrue("/0/score  ".matches(controller.getUrlRegexPattern()));
         assertTrue("/0/score".matches(controller.getUrlRegexPattern()));
         assertTrue("/1/score?".matches(controller.getUrlRegexPattern()));
@@ -137,7 +148,7 @@ public class ScoreControllerTest {
     }
 
     @Test
-    public void verifyInvalidsUrls() {
+    public void testInvalidsUrls() {
         assertFalse("/score".matches(controller.getUrlRegexPattern()));
         assertFalse("//score".matches(controller.getUrlRegexPattern()));
         assertFalse("/-1/score".matches(controller.getUrlRegexPattern()));
@@ -147,7 +158,7 @@ public class ScoreControllerTest {
     }
 
     @Test
-    public void requestMethod_ShouldReturnPost() {
+    public void testRequestMethod() {
         Assert.assertEquals(HttpController.POST, controller.getRequestMethod());
     }
 }

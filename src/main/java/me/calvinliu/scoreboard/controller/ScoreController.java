@@ -19,8 +19,11 @@ import java.util.logging.Logger;
 public class ScoreController implements HttpController {
 
     private static final Logger LOGGER = Logger.getLogger("confLogger");
-    private static final String SESSIONKEY_PARAMETER = "sessionkey";
+    private static final String SESSION_KEY_PARAMETER = "sessionkey";
 
+    /**
+     * Default scope constructor for factory creating and unit testing
+     */
     ScoreController() {
     }
 
@@ -36,10 +39,10 @@ public class ScoreController implements HttpController {
 
     @Override
     public String processRequest(Map<String, String> urlParameters, Integer score, int levelId) {
-        if (urlParameters == null || !urlParameters.containsKey(SESSIONKEY_PARAMETER)) {
+        if (urlParameters == null || !urlParameters.containsKey(SESSION_KEY_PARAMETER)) {
             throw new InvalidParamException(ResponseCode.ERR_INVALID_SESSION);
         }
-        UserSession session = SessionManager.getInstance().getSession(urlParameters.get(SESSIONKEY_PARAMETER));
+        UserSession session = SessionManager.getInstance().getSession(urlParameters.get(SESSION_KEY_PARAMETER));
         if (session == null || session.hasExpired()) {
             throw new InvalidParamException(ResponseCode.ERR_INVALID_SESSION);
         }

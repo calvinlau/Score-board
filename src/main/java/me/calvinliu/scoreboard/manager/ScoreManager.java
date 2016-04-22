@@ -7,6 +7,7 @@ import me.calvinliu.scoreboard.model.UserScore;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -17,7 +18,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class ScoreManager {
 
     private static volatile ScoreManager instance = null;
-    private ConcurrentHashMap<Integer, NavigableSet<UserScore>> levelScores;
+    private Map<Integer, NavigableSet<UserScore>> levelScores;
 
     /**
      * Private constructor for singleton and init
@@ -88,10 +89,11 @@ public class ScoreManager {
 
     /**
      * Directly get the level score map for unit testing.
+     * DO NOT Call it!
      *
      * @return level score map
      */
-    ConcurrentHashMap<Integer, NavigableSet<UserScore>> getUserScores() {
+    public Map<Integer, NavigableSet<UserScore>> getUserScores() {
         return levelScores;
     }
 }
