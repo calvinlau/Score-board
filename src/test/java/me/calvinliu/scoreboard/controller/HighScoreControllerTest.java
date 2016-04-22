@@ -14,6 +14,8 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -44,9 +46,9 @@ public class HighScoreControllerTest {
     @Test
     public void testProcessRequest() {
         sessionManager.createSession(USER_ID_1).getSessionKey();
-        scoreManager.postScore(LEVEL_ID, new UserScore(USER_ID_1, SCORE_1));
+        scoreManager.postScore(LEVEL_ID, new UserScore(USER_ID_1, new AtomicInteger(SCORE_1)));
         sessionManager.createSession(USER_ID_2).getSessionKey();
-        scoreManager.postScore(LEVEL_ID, new UserScore(USER_ID_2, SCORE_2));
+        scoreManager.postScore(LEVEL_ID, new UserScore(USER_ID_2, new AtomicInteger(SCORE_2)));
         String response = controller.processRequest(null, null, LEVEL_ID);
         assertEquals(HIGH_SCORE, response);
 

@@ -12,5 +12,5 @@ public class ResponseCode {
 
     public static final String ERR_INVALID_SESSION = "409";
 
-    public static final String ERR_WRONG_URL = "410";
+    public static final String ERR_INVALID_URL = "410";
 }

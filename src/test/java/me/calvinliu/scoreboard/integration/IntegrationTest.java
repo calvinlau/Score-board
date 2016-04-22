@@ -65,7 +65,7 @@ public class IntegrationTest {
     public void testLogin_InValid() {
         HttpResult result = http.sendGet(INVALID_LOGIN_URL);
         assertEquals(HttpURLConnection.HTTP_OK, result.getCode());
-        assertEquals(ResponseCode.ERR_WRONG_URL, result.getResponse());
+        assertEquals(ResponseCode.ERR_INVALID_URL, result.getResponse());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class IntegrationTest {
     public void testGetHighScoreList_Invalid() {
         HttpResult result = http.sendGet(HIGH_SCORE_LIST_URL_INVALID);
         assertEquals(HttpURLConnection.HTTP_OK, result.getCode());
-        assertEquals(ResponseCode.ERR_WRONG_URL, result.getResponse());
+        assertEquals(ResponseCode.ERR_INVALID_URL, result.getResponse());
     }
 
     /**

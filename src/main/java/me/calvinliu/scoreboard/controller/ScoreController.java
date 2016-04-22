@@ -11,6 +11,7 @@ import me.calvinliu.scoreboard.util.InvalidParamException;
 import me.calvinliu.scoreboard.util.ResponseCode;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 /**
@@ -46,7 +47,7 @@ public class ScoreController implements HttpController {
         if (session == null || session.hasExpired()) {
             throw new InvalidParamException(ResponseCode.ERR_INVALID_SESSION);
         }
-        ScoreManager.getInstance().postScore(levelId, new UserScore(session.getUserId(), score));
+        ScoreManager.getInstance().postScore(levelId, new UserScore(session.getUserId(), new AtomicInteger(score)));
         LOGGER.info("[SCORE](levelId=" + levelId + ", sessionKey=" + session.getSessionKey() + ", score=" + score + ")");
         return EMPTY;
     }

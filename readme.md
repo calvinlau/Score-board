@@ -1,6 +1,6 @@
 # HttpServer Game Scores
 
-Java application that keeps track of the user scores by level.
+The code implements a HTTP-based mini game back-end in Java which registers game scores for different users and levels, with the capability to return high score lists per level.
 
 ## Compiling the application
 
@@ -9,39 +9,74 @@ Prerequisites:
 - JDK 8
 - Apache Maven 3.0+
 
-To compile execute the following command from the root of the project:
-
-    mvn clean package
-
 ## Running the application
 
-### Quick start
-
-To run the application with its default configuration you can use the following command:
-
+### Start the server
     java -jar target/httpserver-scores.jar
 
-> Note: this works if the `jar` file is in the `target` directory.
-
-To stop the server just `Ctrl+c`.
+### Stop the server
+    `Ctrl+c`.
 
 ### Configuration parameters
+Configuration file location: src\main\resources\configuration.properties
 
 To customize the behaviour of the application the following parameters can be passed as arguments:
 
-|Parameter|Values|Required|Description|
+|Parameter|Type|Default|Description|
 |---------|------|--------|-----------|
-|port|An integer value. Port numbers less than 1024 require root permissions.|No|Port number on which the application will listen for requests.|
-|executor|`fixed` or `cached`|No|This parameter determines which strategy to use for HttpServer Executor, it can either be `newCachedThreadPool` or `newFixedThreadPool`. More info [here](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/Executors.html).|
-|poolSize|An integer value.|No|This only applies if `fixed` executor is selected.|
+|BASE_URI|String|localhost|Server host name|
+|SERVER_PORT|Integer|8081|Server port|
+|EXPIRATION_TIME|Integer|600000|Expired timeout in milli sec|
+|EXPIRATION_TIME_PERIOD_CHECK|Integer|10000|Expired timeout cleanup task check period in ms|
+|EXPIRATION_TIME_PERIOD_DELAY|Integer|0|Expired timeout cleanup task check delay in ms|
+|HIGH_SCORES_LIMITATION|Integer|15|Limitation of high scores list|
+|HIGH_SCORES_THRESHOLD_IMITATION|Integer|1000|Space limitation for each level for server space performance improvement|
 
-For example:
+## Technical Solution
 
-    java -jar target/httpserver-score.jar -port=8080 -executor=fixed -poolSize=10
+### Overview
+
+The architecture of the application was made as simple as possible.
+
+- Handler is in charge of receiving the request and forwarding it to the appropriate controller.
+- Controller gathers the information that it requires for processing from the request and forwards it to the service.
+- Manager applies the logic to the received request.
+
+### Data Structures
+
+#### Session
+As the requirement specification doesn't declare that one user should only have one single session in the memory.
+- Use `ConcurrentHashMap<String, UserSession>` to store the data, the key is session key.
+- Creating session, generate key by UUID, then put into ConcurrentHashMap.
+- Get session will get O(1) average runtime to retrieve user session.  
+- When server started, jvm will start a clean up task for space performance and logout, that task will execute per 10 seconds.
+- Clean up expired and duplicated session for single user, eventually consistent. 
+
+#### Score
+Initially, I tried to work with post score as the following code to hold everything in memory:
+
+    levelScores.computeIfAbsent(levelId, n -> new ConcurrentSkipListSet<>()).add(userScore);
+    
+The code is easy, but scalability is important here, data structure could not reasonably be thought to hold all the information required.
+Therefore, I changed my design as these:
+
+- Use `ConcurrentHashMap<levelId, NavigableSet<UserScore>>` to maintain all the score we need. 
+- Use `ConcurrentSkipListSet` to maintain top limit (15) user score by different users.
+- Use `ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, UserScore>>` for de-duplicate same user in the score map.
+- Use compareAndSet method of `AtomicInteger` to update high score
+- As we only need top high score, use `THRESHOLD_NUM` for scalability, not need hold all score
+- Get high score list by traverse `ConcurrentSkipListSet`, also de-duplicate same user in case, eventually consistent.
+
+### Concurrency
+- Managers for both session and score data storage is using double check singleton pattern.
+- Use lock free code logic for the performance
+- Not use Synchronized method for performance
 
 ## Endpoints
 
 ### Login
+
+#### Input and output
 
 |        |Value|Description|
 |--------|-----|-----------|
@@ -51,10 +86,19 @@ For example:
 
 Example:
 
-    curl http://localhost:8080/100/login -> 1B4EB7BE47F046E98E1DC458B80B2D2C
+    GET http://localhost:8081/2/login -> UICSNDK
+
+#### Response Error Codes
+Http code always be 200.
+
+|RESPONSE ERROR CODES|Description           |
+|--------------------|----------------------|
+|408                 |INVALID PARAMETER     |
+|410                 |INVALID URL           |
 
 ### Score
 
+#### Input and output
 |        |Value|Description|
 |--------|-----|-----------|
 |**Path**|`/<levelid>/score?sessionkey=<sessionkey>`|Method can be called several times per user and level. Requests with invalid session keys are ignored.|
@@ -62,61 +106,38 @@ Example:
 |**Request Body**|`<score>`|Integer number that represents the users score for the level.|
 |**Response**|    |Empty response.|
 
-Example:
+#### Example:
+     POST http://localhost:8081/10/score?sessionkey=UICSNDK" 100
 
-    curl -X "POST" "http://localhost:8080/10/score?sessionkey=1B4EB7BE47F046E98E1DC458B80B2D2C" \
-    -d "2500"
+#### Response Error Codes
+Http code always be 200.
+
+|RESPONSE ERROR CODES|Description           |
+|--------------------|----------------------|
+|408                 |INVALID PARAMETER     |
+|409                 |INVALID SESSION KEY   |
+|410                 |INVALID URL           |
 
 ### Get high score list
 
+#### Input and output
 |        |Value|Description|
 |--------|-----|-----------|
 |**Path**|`/<levelid>/highscorelist`|Retrieves the high score list for a level. The list size is determined by the Application configuration.|
 |**Method**|`GET`|   |
 |**Response**|CSV of `<userid>=<score>`|Comma separated list with user id and scores.|
 
-Example:
+#### Example:
+    GET http://localhost:8081/2/highscorelist -> 3=100
 
-    curl http://localhost:8080/10/highscorelist -> 100=2500
-
-
-## Technical Solution
-
-### Overview
-
-The architecture of the application was made as simple as possible (following the KISS principle). It consists mainly of 4 layers.
-
-- Handler is in charge of receiving the request and forwarding it to the appropriate controller.
-- Controller gathers the information that it requires for processing from the request and forwards it to the service.
-- Manager applies the logic to the received request.
-
-### Data Structures & Concurrency
-
-#### Session
-
-
-#### Score
-
-Data storage and concurrency is handled by the Service Layer. Simple denormalized data structures were used to storage and fast retrieval.
-Maps are used to store key/value pairs, this structure was chosen due to the high performance in getting values given a key.
-
-In the cases where data needs to be found by value, additional maps were added with these values as keys.
-In this cases when updating a value, two maps need to be updated and concurrency is handled by locks.
-
-The following diagram shows the relationship of the classes:
-
-![Class Diagram](https://raw.githubusercontent.com/Oreste-Luci/httpserver-gamescores/master/images/class-diagram.png)
+#### Response Error Codes
+|RESPONSE ERROR CODES|Description           |
+|--------------------|----------------------|
+|408                 |INVALID PARAMETER     |
+|410                 |INVALID URL           |
 
 ## Improvements
+- Interceptor can be added for logging, performance monitoring
+- Dependency Injection instead of creating objects and in terms of loose coupling
+- More Unit tests for better coverage and thread safety.
 
-The following improvements can be made to the solution:
-
-- Removed expired session tokens with scheduler to reduce memory consumption.
-In the implemented solution tokens are created every time a login request is received and they are only deleted when a score post is made with an expired session key.
-- More denormalization for better read performance.
-- A distributed storage solution could be used to increase performace in response time and storage capacity, for example Cassandra.
-- More Unit tests for better coverage.
-
-## Source Code
-
-The source code can be found in [https://github.com/Oreste-Luci/httpserver-gamescores](https://github.com/Oreste-Luci/httpserver-gamescores).

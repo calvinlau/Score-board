@@ -28,6 +28,8 @@ public class PropertiesManager {
     private static final int EXPIRATION_TIME_PERIOD_DELAY_DEFAULT = 0;
     private static final String HIGH_SCORES_LIMITATION = "HIGH_SCORES_LIMITATION";
     private static final int HIGH_SCORES_LIMITATION_DEFAULT = 15;
+    private static final String HIGH_SCORES_THRESHOLD_LIMITATION = "HIGH_SCORES_THRESHOLD_IMITATION";
+    private static final int HIGH_SCORES_THRESHOLD_IMITATION_DEFAULT = 15;
 
     private static volatile PropertiesManager instance = null;
 
@@ -112,5 +114,9 @@ public class PropertiesManager {
 
     public int getHighScoresLimit() {
         return getInt(HIGH_SCORES_LIMITATION, HIGH_SCORES_LIMITATION_DEFAULT);
+    }
+
+    public int getHighScoresThresholdLimit() {
+        return getInt(HIGH_SCORES_THRESHOLD_LIMITATION, HIGH_SCORES_THRESHOLD_IMITATION_DEFAULT);
     }
 }

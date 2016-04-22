@@ -1,6 +1,6 @@
 /*
- * Creator: Calvin Liu
- */
+* Creator: Calvin Liu
+*/
 package me.calvinliu.scoreboard.manager;
 
 import me.calvinliu.scoreboard.model.UserScore;
