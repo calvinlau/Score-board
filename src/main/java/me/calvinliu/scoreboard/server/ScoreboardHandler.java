@@ -39,7 +39,8 @@ public class ScoreboardHandler implements HttpHandler {
             LOGGER.info(exchange.getRequestMethod() + " Url not mapped: " + exchange.getRequestURI());
             writeResponse(exchange, ResponseCode.ERR_INVALID_URL, HttpURLConnection.HTTP_OK);
         } catch (InvalidParamException e) {
-            LOGGER.warning("URL Handler error, " + e.getMessage());
+            LOGGER.warning("URL Handler warning, Code: " + e.getMessage() + ", Url: " + exchange.getRequestURI());
+            writeResponse(exchange, e.getMessage(), HttpURLConnection.HTTP_OK);
         } finally {
             exchange.getResponseBody().close();
         }

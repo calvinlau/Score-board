@@ -7,22 +7,15 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.InjectMocks;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class LoginControllerTest {
 
     private static final int USER_ID = 1234;
-
-    @InjectMocks
-    private HttpController controller = new LoginController();
-
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+    private HttpController controller = new LoginController();
 
     @Test
     public void testProcessRequest() {

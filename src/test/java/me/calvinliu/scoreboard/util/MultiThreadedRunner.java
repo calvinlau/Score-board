@@ -1,3 +1,6 @@
+/*
+ * Creator: Calvin Liu
+ */
 package me.calvinliu.scoreboard.util;
 
 import org.junit.runner.notification.RunNotifier;
@@ -13,9 +16,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MultiThreadedRunner extends BlockJUnit4ClassRunner {
 
-    private AtomicInteger numThreads;
-
     public static int maxThreads = 8;
+    private AtomicInteger numThreads;
 
     public MultiThreadedRunner(Class<?> klass) throws InitializationError {
         super(klass);

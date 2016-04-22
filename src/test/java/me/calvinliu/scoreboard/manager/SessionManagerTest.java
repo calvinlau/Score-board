@@ -4,20 +4,15 @@
 package me.calvinliu.scoreboard.manager;
 
 import me.calvinliu.scoreboard.model.UserSession;
+import me.calvinliu.scoreboard.util.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class SessionManagerTest {
 
@@ -37,7 +32,7 @@ public class SessionManagerTest {
 
     @Test
     public void testCreateUserSessionNotLoggedInUser() {
-        int userId = getRandomUserId();
+        int userId = TestUtils.getRandomUserId();
         UserSession session = sessionManager.createSession(userId);
         assertNotNull(session);
         assertNotNull(session.getSessionKey());
@@ -48,7 +43,7 @@ public class SessionManagerTest {
     @Test
     public void testCreateUserSessionLoggedInUser() {
         // Login a user
-        int userId = getRandomUserId();
+        int userId = TestUtils.getRandomUserId();
         UserSession session1 = sessionManager.createSession(userId);
         try {
             Thread.sleep(100);
@@ -63,7 +58,7 @@ public class SessionManagerTest {
     @Test
     public void testGetUserSessionLoggedInUser() {
         // Login a user
-        int userId = getRandomUserId();
+        int userId = TestUtils.getRandomUserId();
         UserSession session = sessionManager.createSession(userId);
         assertSame(session, sessionManager.getSession(session.getSessionKey()));
     }
@@ -79,7 +74,7 @@ public class SessionManagerTest {
         // Sets timeout to 0.1 s
         int timeout = 100;
         // Login a user
-        int userId = getRandomUserId();
+        int userId = TestUtils.getRandomUserId();
         UserSession session = sessionManager.createSession(userId);
         assertNotNull(sessionManager.getSession(session.getSessionKey()));
         try {
@@ -97,7 +92,7 @@ public class SessionManagerTest {
         int timeout = 600000;
         int repeatTime = 5;
         // Login 1 user for 5 times
-        int userId = getRandomUserId();
+        int userId = TestUtils.getRandomUserId();
         List<String> keyList = new LinkedList<>();
         for (int i = 0; i < repeatTime; i++) {
             UserSession session = sessionManager.createSession(userId);
@@ -113,10 +108,6 @@ public class SessionManagerTest {
         }
         // Not sure 100% to clean all duplicate session by one time clean up, eventually it will only single for one user at most.
         assertTrue(count >= 1);
-    }
-
-    private int getRandomUserId() {
-        return Math.abs(new BigInteger(130, random).intValue());
     }
 
     private String getRandomSessionKey() {

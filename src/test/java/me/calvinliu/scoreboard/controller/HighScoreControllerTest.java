@@ -7,18 +7,13 @@ import me.calvinliu.scoreboard.manager.ScoreManager;
 import me.calvinliu.scoreboard.manager.SessionManager;
 import me.calvinliu.scoreboard.model.UserScore;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class HighScoreControllerTest {
 
@@ -28,20 +23,11 @@ public class HighScoreControllerTest {
     private static final int USER_ID_2 = 3;
     private static final int SCORE_2 = 1500;
     private static final String HIGH_SCORE = "3=1500,2=1000";
-
-    private SessionManager sessionManager = SessionManager.getInstance();
-    private ScoreManager scoreManager = ScoreManager.getInstance();
-
-    @InjectMocks
-    private HttpController controller = new HighScoreListController();
-
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
+    private SessionManager sessionManager = SessionManager.getInstance();
+    private ScoreManager scoreManager = ScoreManager.getInstance();
+    private HttpController controller = new HighScoreListController();
 
     @Test
     public void testProcessRequest() {

@@ -13,9 +13,7 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 //@RunWith(MultiThreadedRunner.class)
 public class ScoreManagerTest {
@@ -88,7 +86,7 @@ public class ScoreManagerTest {
     }
 
     @Test
-    public void testPostScoreAddUserScoresToOneExistedLevelAndManyOtherNonExistedLevelsMultipleTreads() {
+    public void testPostScore_MultipleTreads() {
         int NUMBER_OF_EXISTED_LEVELS = 1;
         int NUMBER_OF_EXISTED_SCORES = 5;
         int NUMBER_OF_NEW_SCORES_IN_EXISTED_LEVEL = 5;
@@ -128,7 +126,7 @@ public class ScoreManagerTest {
     }
 
     @Test
-    public void testPostScoreLevelsNotExistedMultipleTreads() {
+    public void testPostScore_NotExisted_MultipleTreads() {
         int NUMBER_OF_THREADS = 10;
         Map<Integer, UserScore> mapValues = new HashMap<>();
 
@@ -145,44 +143,7 @@ public class ScoreManagerTest {
     }
 
     @Test
-    public void testGetHighScoreListLevelHasScoresMoreThanLimit() {
-        //do assertion for the limit and response
-        Integer levelId = TestUtils.getRandomLevelId();
-        int SCORES_LIMIT = 10;
-        int ADDED_SCORES = 15000;
-
-        // add more user scores than the limit
-        Map<Integer, Integer> mapValues = new HashMap<>();
-        postScores(mapValues, levelId, ADDED_SCORES, false);
-
-        String highScoreList = scoreManager.getHighScoreList(levelId, SCORES_LIMIT);
-
-        assertOrder(highScoreList);
-
-        scoreManager.getUserScores().clear();
-    }
-
-    @Test
-    public void testGetHighScoreListLevelHasScoresWithSameUserId() {
-        //do assertion for the limit and response
-        Integer levelId = TestUtils.getRandomLevelId();
-        int SCORES_LIMIT = 10;
-        int ADDED_SCORES = 15;
-
-        // add more user scores than the limit
-        Map<Integer, Integer> mapValues = new HashMap<>();
-
-        postScores(mapValues, levelId, ADDED_SCORES, true);
-        postScores(mapValues, levelId, ADDED_SCORES, true);
-
-        String highScoreList = scoreManager.getHighScoreList(levelId, SCORES_LIMIT);
-        assertOrder(highScoreList);
-
-        scoreManager.getUserScores().clear();
-    }
-
-    @Test
-    public void testGetHighScoreListLevelHasScoresLessThanLimit() {
+    public void testHighScoreList_LessThanLimit() {
         Integer levelId = TestUtils.getRandomLevelId();
         int SCORES_LIMIT = 10;
         int ADDED_SCORES = 5;
@@ -209,7 +170,44 @@ public class ScoreManagerTest {
     }
 
     @Test
-    public void testGetHighScoreListLevelHasNoScores() {
+    public void testHighScoreList_MoreThanLimit() {
+        //do assertion for the limit and response
+        Integer levelId = TestUtils.getRandomLevelId();
+        int SCORES_LIMIT = 10;
+        int ADDED_SCORES = 15000;
+
+        // add more user scores than the limit
+        Map<Integer, Integer> mapValues = new HashMap<>();
+        postScores(mapValues, levelId, ADDED_SCORES, false);
+
+        String highScoreList = scoreManager.getHighScoreList(levelId, SCORES_LIMIT);
+
+        assertOrder(highScoreList);
+
+        scoreManager.getUserScores().clear();
+    }
+
+    @Test
+    public void testHighScoreList_SameUserId() {
+        //do assertion for the limit and response
+        Integer levelId = TestUtils.getRandomLevelId();
+        int SCORES_LIMIT = 10;
+        int ADDED_SCORES = 15;
+
+        // add more user scores than the limit
+        Map<Integer, Integer> mapValues = new HashMap<>();
+
+        postScores(mapValues, levelId, ADDED_SCORES, true);
+        postScores(mapValues, levelId, ADDED_SCORES, true);
+
+        String highScoreList = scoreManager.getHighScoreList(levelId, SCORES_LIMIT);
+        assertOrder(highScoreList);
+
+        scoreManager.getUserScores().clear();
+    }
+
+    @Test
+    public void testHighScoreList_NoScores() {
         Integer levelId = TestUtils.getRandomLevelId();
         assertEquals("", scoreManager.getHighScoreList(levelId, DEFAULT_LIMIT));
     }

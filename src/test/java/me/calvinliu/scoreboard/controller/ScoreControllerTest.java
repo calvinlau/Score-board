@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.InjectMocks;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,16 +25,11 @@ public class ScoreControllerTest {
     private static final int LEVEL_ID = 2121;
     private static final int USER_ID = 222;
     private static final int SCORE = 32;
-
-    private ScoreManager scoreManager;
-    private SessionManager sessionManager;
-
-    @InjectMocks
-    private HttpController controller = new ScoreController();
-
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
-
+    private ScoreManager scoreManager;
+    private SessionManager sessionManager;
+    private HttpController controller = new ScoreController();
     // input parameters
     private int integerFromUrl;
     private Map<String, String> urlParameters;

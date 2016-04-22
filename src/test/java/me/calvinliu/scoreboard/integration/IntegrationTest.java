@@ -22,7 +22,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 @Category(IntegrationTest.class)
 public class IntegrationTest {
@@ -82,20 +81,20 @@ public class IntegrationTest {
     public void testPostScore_Invalid() {
         HttpResult loginResult = http.sendGet(LOGIN_URL);
         HttpResult scoreResult = http.sendPost(SCORE_URL_INVALID + "sessionkey=" + loginResult.getResponse(), BODY_SCORE);
-        assertNotEquals(HttpURLConnection.HTTP_OK, scoreResult.getCode());
+        assertEquals(HttpURLConnection.HTTP_OK, scoreResult.getCode());
         assertEquals(HttpController.EMPTY, scoreResult.getResponse());
     }
 
     @Test
     public void testPostScore_Overflow() {
         HttpResult result = http.sendGet(LOGIN_URL);
-        assertNotEquals(HttpURLConnection.HTTP_OK, http.sendPost(SCORE_URL + "sessionkey=" + result.getResponse(), BODY_SCORE_OVERFLOW).getCode());
+        assertEquals(HttpURLConnection.HTTP_OK, http.sendPost(SCORE_URL + "sessionkey=" + result.getResponse(), BODY_SCORE_OVERFLOW).getCode());
     }
 
     @Test
     public void testPostScore_String() {
         HttpResult result = http.sendGet(LOGIN_URL);
-        assertNotEquals(HttpURLConnection.HTTP_OK, http.sendPost(SCORE_URL + "sessionkey=" + result.getResponse(), BODY_SCORE_STRING).getCode());
+        assertEquals(HttpURLConnection.HTTP_OK, http.sendPost(SCORE_URL + "sessionkey=" + result.getResponse(), BODY_SCORE_STRING).getCode());
     }
 
     @Test

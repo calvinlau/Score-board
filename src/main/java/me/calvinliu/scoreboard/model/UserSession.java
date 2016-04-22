@@ -39,6 +39,6 @@ public class UserSession {
 
     @Override
     public String toString() {
-        return "UserSession{" + "userId=" + userId + ", sessionKey='" + sessionKey + ", createdDate=" + createdDate + '}';
+        return "UserSession{" + "userId=" + userId + ", sessionKey=" + sessionKey + ", createdDate=" + createdDate + '}';
     }
 }
