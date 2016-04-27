@@ -29,7 +29,7 @@ public class PropertiesManager {
     private static final String HIGH_SCORES_LIMITATION = "HIGH_SCORES_LIMITATION";
     private static final int HIGH_SCORES_LIMITATION_DEFAULT = 15;
     private static final String HIGH_SCORES_THRESHOLD_LIMITATION = "HIGH_SCORES_THRESHOLD_IMITATION";
-    private static final int HIGH_SCORES_THRESHOLD_IMITATION_DEFAULT = 15;
+    private static final int HIGH_SCORES_THRESHOLD_IMITATION_DEFAULT = 1000;
 
     private static volatile PropertiesManager instance = null;
 
@@ -50,13 +50,17 @@ public class PropertiesManager {
      * @return the manager's instance.
      */
     public static PropertiesManager getInstance() {
-        if (instance == null) {
+        // The effect of this result is that in cases where instance is already initialized
+        // the volatile field is only accessed once which can improve overall performance
+        PropertiesManager result = instance;
+        if (result == null) {
             synchronized (PropertiesManager.class) {
-                if (instance == null)
-                    instance = new PropertiesManager();
+                result = instance;
+                if (result == null)
+                    instance = result = new PropertiesManager();
             }
         }
-        return instance;
+        return result;
     }
 
     /**

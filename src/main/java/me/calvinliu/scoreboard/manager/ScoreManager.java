@@ -38,13 +38,17 @@ public class ScoreManager {
      * @return the manager's instance.
      */
     public static ScoreManager getInstance() {
-        if (instance == null) {
+        // The effect of this result is that in cases where instance is already initialized
+        // the volatile field is only accessed once which can improve overall performance
+        ScoreManager result = instance;
+        if (result == null) {
             synchronized (ScoreManager.class) {
-                if (instance == null)
-                    instance = new ScoreManager();
+                result = instance;
+                if (result == null)
+                    instance = result = new ScoreManager();
             }
         }
-        return instance;
+        return result;
     }
 
     /**

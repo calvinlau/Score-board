@@ -44,13 +44,17 @@ public class SessionManager {
      * @return the manager's instance.
      */
     public static SessionManager getInstance() {
-        if (instance == null) {
+        // The effect of this result is that in cases where instance is already initialized
+        // the volatile field is only accessed once which can improve overall performance
+        SessionManager result = instance;
+        if (result == null) {
             synchronized (SessionManager.class) {
-                if (instance == null)
-                    instance = new SessionManager();
+                result = instance;
+                if (result == null)
+                    instance = result = new SessionManager();
             }
         }
-        return instance;
+        return result;
     }
 
     public Timer getTimer() {
