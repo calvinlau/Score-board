@@ -5,6 +5,7 @@ package me.calvinliu.scoreboard.manager;
 
 import me.calvinliu.scoreboard.model.UserScore;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -17,6 +18,25 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Stores and manages the user scores for every level.
  */
 public class ScoreManager {
+
+
+    public static void main(String[] args) {
+        Map<Integer, UserScore> map = new HashMap<>();
+        Set<UserScore> set = new ConcurrentSkipListSet<>();
+        UserScore m1 = new UserScore(2, new AtomicInteger(3));
+        UserScore m2 = new UserScore(1, new AtomicInteger(5));
+        map.put(m1.getUserId(), m1);
+        map.put(m2.getUserId(), m2);
+        set.add(m1);
+        set.add(m2);
+        System.out.println(map);
+        System.out.println(set);
+        set.remove(m1);
+        m1.getScore().compareAndSet(3, 8);
+        set.add(m1);
+        System.out.println(map);
+        System.out.println(set);
+    }
 
     private static volatile ScoreManager instance = null;
     private static final int THRESHOLD_NUM = PropertiesManager.getInstance().getHighScoresThresholdLimit();
@@ -60,31 +80,64 @@ public class ScoreManager {
      */
     public void postScore(Integer levelId, UserScore userScore) {
         NavigableSet<UserScore> scoreSet = levelScores.computeIfAbsent(levelId, n -> new ConcurrentSkipListSet<>());
+        Map<Integer, UserScore> scoreMap = userScores.computeIfAbsent(levelId, n -> new ConcurrentHashMap<>());
         // Keep the score set's size smaller than THRESHOLD_NUM
         while (scoreSet.size() >= THRESHOLD_NUM) {
             UserScore remove = scoreSet.pollFirst();
-            userScores.computeIfAbsent(levelId, n -> new ConcurrentHashMap<>()).remove(remove.getUserId());
+            scoreMap.remove(remove.getUserId());
         }
 
-        // Update high score if needed
+        UserScore old = scoreMap.get(userScore.getUserId());
+        if (old == null) {
+            scoreSet.add(userScore);
+            scoreMap.put(userScore.getUserId(), userScore);
+        } else {
+            if (userScore.getScore().get() > old.getScore().get()) {
+                scoreSet.remove(old);
+                scoreSet.add(userScore);
+                scoreMap.put(userScore.getUserId(), userScore);
+            }
+        }
+    }
+
+    /**
+     * Puts a user score into a specific level.
+     * This method is lock-free to ensure thread-safety access to the user scores map.
+     * <p/>
+     * Thread Safe for same user/level concurrent update
+     *
+     * @param levelId   to assign the user score to
+     * @param userScore to be put in the map
+     */
+    public void postScore2(Integer levelId, UserScore userScore) {
+        NavigableSet<UserScore> scoreSet = levelScores.computeIfAbsent(levelId, n -> new ConcurrentSkipListSet<>());
         Map<Integer, UserScore> scoreMap = userScores.computeIfAbsent(levelId, n -> new ConcurrentHashMap<>());
-        if (scoreMap.containsKey(userScore.getUserId())) {
-            UserScore oldUserScore = scoreMap.get(userScore.getUserId());
-            // Use compareAndSet method of AtomicInteger to update high score lock free
-            AtomicInteger oldScore = oldUserScore.getScore();
-            while (true) {
+
+        // Keep the score set's size smaller than THRESHOLD_NUM
+        while (scoreSet.size() >= THRESHOLD_NUM) {
+            UserScore remove = scoreSet.pollFirst();
+            scoreMap.remove(remove.getUserId());
+        }
+
+        // Use compareAndSet method of AtomicInteger to update high score lock free
+        while (true) {
+            UserScore old = scoreMap.putIfAbsent(userScore.getUserId(), userScore);
+            if (old == null) {
+                scoreSet.add(userScore);
+                break;
+            } else {
+                AtomicInteger oldScore = old.getScore();
                 int oldVal = oldScore.get();
                 if (userScore.getScore().get() <= oldVal) {
                     break;
                 }
+                scoreSet.remove(old);
                 boolean success = oldScore.compareAndSet(oldVal, userScore.getScore().get());
                 if (success) {
+                    scoreSet.add(userScore);
                     break;
                 }
             }
-        } else {
-            scoreSet.add(userScore);
-            scoreMap.put(userScore.getUserId(), userScore);
         }
     }
 
@@ -132,3 +185,4 @@ public class ScoreManager {
         return levelScores;
     }
 }
+
