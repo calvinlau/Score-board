@@ -5,7 +5,6 @@ package me.calvinliu.scoreboard.manager;
 
 import me.calvinliu.scoreboard.model.UserScore;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -19,27 +18,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ScoreManager {
 
-
-    public static void main(String[] args) {
-        Map<Integer, UserScore> map = new HashMap<>();
-        Set<UserScore> set = new ConcurrentSkipListSet<>();
-        UserScore m1 = new UserScore(2, new AtomicInteger(3));
-        UserScore m2 = new UserScore(1, new AtomicInteger(5));
-        map.put(m1.getUserId(), m1);
-        map.put(m2.getUserId(), m2);
-        set.add(m1);
-        set.add(m2);
-        System.out.println(map);
-        System.out.println(set);
-        set.remove(m1);
-        m1.getScore().compareAndSet(3, 8);
-        set.add(m1);
-        System.out.println(map);
-        System.out.println(set);
-    }
-
-    private static volatile ScoreManager instance = null;
     private static final int THRESHOLD_NUM = PropertiesManager.getInstance().getHighScoresThresholdLimit();
+    private static volatile ScoreManager instance = null;
     private Map<Integer, Map<Integer, UserScore>> userScores;
     private Map<Integer, NavigableSet<UserScore>> levelScores;
 
@@ -92,6 +72,7 @@ public class ScoreManager {
             scoreSet.add(userScore);
             scoreMap.put(userScore.getUserId(), userScore);
         } else {
+            // UserScore's score also can change to int
             if (userScore.getScore().get() > old.getScore().get()) {
                 scoreSet.remove(old);
                 scoreSet.add(userScore);
@@ -121,17 +102,17 @@ public class ScoreManager {
 
         // Use compareAndSet method of AtomicInteger to update high score lock free
         while (true) {
-            UserScore old = scoreMap.putIfAbsent(userScore.getUserId(), userScore);
-            if (old == null) {
+            UserScore oldUserScore = scoreMap.putIfAbsent(userScore.getUserId(), userScore);
+            if (oldUserScore == null) {
                 scoreSet.add(userScore);
                 break;
             } else {
-                AtomicInteger oldScore = old.getScore();
+                AtomicInteger oldScore = oldUserScore.getScore();
                 int oldVal = oldScore.get();
                 if (userScore.getScore().get() <= oldVal) {
                     break;
                 }
-                scoreSet.remove(old);
+                scoreSet.remove(oldUserScore);
                 boolean success = oldScore.compareAndSet(oldVal, userScore.getScore().get());
                 if (success) {
                     scoreSet.add(userScore);

@@ -38,9 +38,14 @@ To customize the behaviour of the application the following parameters can be pa
 
 The architecture of the application was made as 2 tier, no DAO tier as there is no need to make data persistence.
 
-- Handler is in charge of receiving the request and forwarding it to the appropriate controller.
-- Controller gathers the information that it requires for processing from the request and forwards it to the service.
+- Handler is centralized access point which in charge of receiving the request and dispatch it to the appropriate controller.
+    - Including invoking security services such as authentication and authorization
+    - Delegating business processing, managing the choice of an appropriate view
+    - Handling errors.
+    - A helper is responsible for helping controller complete its processing.
+- Controller gathers the information that it requires for processing from the request and forwards it to the Manager.
 - Manager applies the logic to the received request.
+- Singleton for performance but not thread safe
 
 ### Data Structures
 
@@ -49,8 +54,9 @@ As the requirement specification doesn't declare that one user should only have 
 - Use `ConcurrentHashMap<String, UserSession>` to store the data, the key is session key.
 - Creating session, generate key by UUID, then put into ConcurrentHashMap.
 - Get session will get O(1) average runtime to retrieve user session.  
-- When server started, jvm will start a clean up task for space performance and logout, that task will execute per 10 seconds.
+- When server started, jvm will start a clean up task for space performance and logout, that task will execute per 10 seconds default.
 - Clean up expired and duplicated session for single user, eventually consistent. 
+- The reason why I didn't use userId as the key because of query a session key will cost O(n) to traverse a map or adding another map which will a little more complicated.
 
 #### Score
 Initially, I tried to work with post score as the following code to hold everything in memory:
@@ -140,3 +146,5 @@ Http code always be 200.
 - Dependency Injection instead of creating objects and in terms of loose coupling
 - More Unit tests for better coverage and thread safety.
 
+## More thoughts
+- Nested Database
