@@ -63,7 +63,7 @@ public class SessionManager {
 
     /**
      * This works by UUID.
-     * Package score for unit test.
+     * Package scope for unit test.
      *
      * @return a new unique session key
      */

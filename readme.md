@@ -65,16 +65,17 @@ Initially, I tried to work with post score as the following code to hold everyth
     
 The code is easy, but scalability is important here, it could not reasonably be thought to hold all the information required.
 Therefore, I changed my design as these:
-
+- First idea is use MaxHeap to maintain top k score, in Java we can use PriorityQueue or TreeSet, but they are not thread safe.
 - Use `ConcurrentHashMap<levelId, NavigableSet<UserScore>>` to maintain all the score we need. 
 - Use `ConcurrentSkipListSet` to maintain top limit (15) user score by different users.
+- As we only need top 15 high score, use another `THRESHOLD_NUM` for scalability, no need to hold all scores.
 - Use `ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, UserScore>>` for de-duplicate same user in the score map.
 - Use compareAndSet method of `AtomicInteger` to update high score if needed.
-- As we only need top 15 high score, use another `THRESHOLD_NUM` for scalability, not need hold all scores.
+
 - Get high score list by traverse `ConcurrentSkipListSet`, also de-duplicate same user just in case, guarantee eventually consistent.
 
 ### Concurrency
-- Managers for both session and score data storage is using double check singleton pattern.
+- Managers for both session and score data storage is using double check singleton design pattern.
 - Use lock free code logic rather than Synchronized method for low latency performance
 
 ## Endpoints

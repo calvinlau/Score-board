@@ -22,6 +22,7 @@ public class ScoreManager {
     private static volatile ScoreManager instance = null;
     private Map<Integer, Map<Integer, UserScore>> userScores;
     private Map<Integer, NavigableSet<UserScore>> levelScores;
+    private Map<String, Integer> cache;
 
     /**
      * Private constructor for singleton and init
@@ -29,6 +30,7 @@ public class ScoreManager {
     private ScoreManager() {
         userScores = new ConcurrentHashMap<>();
         levelScores = new ConcurrentHashMap<>();
+        cache = new ConcurrentHashMap<>();
     }
 
     /**
@@ -59,26 +61,26 @@ public class ScoreManager {
      * @param userScore to be put in the map
      */
     public void postScore(Integer levelId, UserScore userScore) {
-        NavigableSet<UserScore> scoreSet = levelScores.computeIfAbsent(levelId, n -> new ConcurrentSkipListSet<>());
         Map<Integer, UserScore> scoreMap = userScores.computeIfAbsent(levelId, n -> new ConcurrentHashMap<>());
-        // Keep the score set's size smaller than THRESHOLD_NUM
-        while (scoreSet.size() >= THRESHOLD_NUM) {
-            UserScore remove = scoreSet.pollFirst();
-            scoreMap.remove(remove.getUserId());
+        Integer userId = userScore.getUserId();
+
+        // Avoid post one user's lower score
+        if (scoreMap.containsKey(userId) && scoreMap.get(userId).getScore().get() >= userScore.getScore().get()) {
+            return;
         }
 
-        UserScore old = scoreMap.get(userScore.getUserId());
-        if (old == null) {
-            scoreSet.add(userScore);
-            scoreMap.put(userScore.getUserId(), userScore);
-        } else {
-            // UserScore's score also can change to int
-            if (userScore.getScore().get() > old.getScore().get()) {
-                scoreSet.remove(old);
-                scoreSet.add(userScore);
-                scoreMap.put(userScore.getUserId(), userScore);
+        NavigableSet<UserScore> scoreSet = levelScores.computeIfAbsent(levelId, n -> new ConcurrentSkipListSet<>());
+        // Keep the score set's size smaller than THRESHOLD_NUM
+        if (scoreSet.size() > THRESHOLD_NUM) {
+            UserScore remove = scoreSet.pollFirst();
+            if (userScore.getScore().get() < remove.getScore().get()) {
+                return;
             }
         }
+
+        // Save to set
+        scoreMap.put(userId, userScore);
+        scoreSet.add(userScore);
     }
 
     /**
