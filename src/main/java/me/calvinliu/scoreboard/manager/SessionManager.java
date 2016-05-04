@@ -109,15 +109,21 @@ public class SessionManager {
             if (now.getTime() - userSession.getCreatedDate().getTime() > timeout) {
                 userSession = userSessions.remove(userSession.getSessionKey());
                 LOGGER.info("[REMOVING SESSION] " + userSession);
+                continue;
             }
             // Remove duplicated session for single user
             if (idKeyMap.containsKey(userSession.getUserId())) {
                 String key = idKeyMap.get(userSession.getUserId());
                 UserSession preSession = userSessions.get(key);
-                if (preSession != null && preSession.getCreatedDate().getTime() <= userSession.getCreatedDate().getTime()) {
-                    userSessions.remove(preSession.getSessionKey());
-                    LOGGER.info("[REMOVING SESSION] " + userSession);
-                    idKeyMap.replace(userSession.getUserId(), userSession.getSessionKey());
+                if (preSession != null) {
+                    if (preSession.getCreatedDate().getTime() <= userSession.getCreatedDate().getTime()) {
+                        userSessions.remove(preSession.getSessionKey());
+                        LOGGER.info("[REMOVING SESSION] " + preSession);
+                        idKeyMap.replace(userSession.getUserId(), userSession.getSessionKey());
+                    } else {
+                        userSessions.remove(userSession.getSessionKey());
+                        LOGGER.info("[REMOVING SESSION] " + userSession);
+                    }
                 }
             } else {
                 idKeyMap.put(userSession.getUserId(), userSession.getSessionKey());

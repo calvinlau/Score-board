@@ -144,7 +144,7 @@ Http code always be 200.
 
 ## Improvements
 - Interceptor can be added for logging, performance monitoring
-- Dependency Injection instead of creating objects and in terms of loose coupling
+- Dependency Injection for manager instance creation in terms of loose coupling
 - More Unit tests for better coverage and thread safety.
 
 ## More thoughts
